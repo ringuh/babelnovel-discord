@@ -1,0 +1,16 @@
+{
+    "discord_token": "NjM0Nz...",
+    "prefix": "!",
+    "bypass_list": ["<discord_user_id>"],
+    "db": {
+        "dialect": "sqlite",
+        "storage": "./database/babeldb.sqlite",
+        "logging": false
+    },
+    "api": {
+        "latest_chapters": "https://babelnovel.com/api/chapters/latest"
+    },
+    "interval": { 
+        "latest_chapters": 30
+    }
+}

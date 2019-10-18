@@ -1,0 +1,28 @@
+{
+    "name": "rimlu-babelnovel",
+    "version": "1.0.0",
+    "description": "babelnovel discord bot",
+    "main": "server.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node server.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ringuh/babelnovel-discord.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/ringuh/babelnovel-discord/issues"
+    },
+    "homepage": "https://github.com/ringuh/babelnovel-discord#readme",
+    "dependencies": {
+        "axios": "^0.19.0",
+        "discord.js": "^11.5.1",
+        "javascript-time-ago": "^2.0.2",
+        "puppeteer": "^1.20.0",
+        "sequelize": "^5.21.0",
+        "sqlite3": "^4.1.0"
+    }
+}
