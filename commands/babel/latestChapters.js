@@ -14,7 +14,7 @@ module.exports = {
     execute(message, args) {
         LatestChapter.findAll({
             order: [["publishTime", "desc"], ["createdAt", "desc"]],
-            limit: latest_chapter_limit
+            limit: numerics.latest_chapter_limit
         }).then(chapters => {
             let str = [`Latest chapters:`]
            

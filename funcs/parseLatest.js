@@ -73,7 +73,7 @@ const parseLatest = async (client) => {
         await browser.close()
     }
     catch (e) {
-        console.log(e)
+        console.log(e.message)
     }
 }
 
