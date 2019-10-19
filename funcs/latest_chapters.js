@@ -1,16 +1,21 @@
-const axios = require('axios');
 const puppeteer = require('puppeteer');
+const urlTool = require('url')
 const { api, interval } = global.config;
 const { AnnounceNovel, LatestChapter, Setting } = require('../models')
 
 const parseLatest = async (client) => {
+
+    /* /let tmp = urlTool.parse('https://img.babelchain.org/book_images/Monarch of the Dark Nights.jpg').href
+    let tmp = urlTool.parse(null).href || null
+    console.log(tmp)
+    return true */
     try {
         const announceNovels = await AnnounceNovel.findAll({})
         const servers = await Setting.findAll({ where: { key: 'latest_chapter_channel' } })
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
         await page.goto("https://babelnovel.com");
-        await page.goto(`${api.latest_chapters}?pageSize=20`);
+        await page.goto(`${api.latest_chapters}?pageSize=200`);
         await page.screenshot({ path: `babelshot.tmp.png` });
 
         const json = await page.evaluate(() => {
@@ -19,42 +24,48 @@ const parseLatest = async (client) => {
         if (!json) return console.log("nothing found")
         console.log(json.data[0])
 
-        
-    
-        json.data.reverse().map(async c => {
-            c.babelId = c.id
-            delete c.id
 
-            const new_chapter = await LatestChapter.findOne({ where: { babelId: c.babelId } }).then(async lc => {
-                if (!lc) return await LatestChapter.create(c)
-                return null
-            })
-            
-            if(!new_chapter || !announceNovels.length) return c
-            const announces = await announceNovels.filter(an => an.bookId === c.bookId)
-            announces.map(an => {
-                const guild = client.guilds.get(an.server)
-                if(!guild) return null
 
-                if(!an.channels){
-                    an.channels = ""
-                    const setting = servers.find(s => s.server === an.server)
-                    if(setting) an.channels = setting.value
+        json.data.reverse().map(async chapterData => {
+            chapterData.babelId = chapterData.id
+            chapterData.bookCover = chapterData.bookCover ? urlTool.parse(chapterData.bookCover).href : null
+            delete chapterData.id
+            const url = `https://babelnovel.com/books/${chapterData.bookCanonicalName}/chapters/${chapterData.canonicalName}`
+            console.log(url)
+            const new_chapter = await LatestChapter.findOne({ where: { babelId: chapterData.babelId } })
+                .then(async lc => {
+                    if (!lc) return await LatestChapter.create(chapterData)
+                    //return lc
+                    //return null
+                })
+           
+            if (!new_chapter || !announceNovels.length) return null
+            const announces = await announceNovels.filter(announce => announce.bookId === chapterData.bookId)
+            announces.map(announce => {
+                const guild = client.guilds.get(announce.server)
+                if (!guild) return console.log(`Guild not found ${announce.server}`)
+
+                if (!announce.channels) {
+                    const setting = servers.find(s => s.server === announce.server)
+                    if (setting) announce.channels = setting.value
+                    else return console.log(`Default channel not found on ${guild.name}`)
                 }
 
-                const roles = an.roles ? an.roles.split(",").map(role_id => 
-                    guild.roles.get(role_id)).filter(role => role): []
+                const roles = announce.roles ? announce.roles.split(",").map(role_id =>
+                    guild.roles.get(role_id)).filter(role => role) : []
 
                 const msg = `${new_chapter.Url()} ${roles.join(" ")}`
-                
-                an.channels.split(",").map(channel_id => {
+                const chapter_url = new_chapter.Url()
+                const roleSpam = roles.join(" ")
+
+                announce.channels.split(",").map(channel_id => {
                     const channel = guild.channels.get(channel_id)
-                    channel.send(msg, { code: false });
-                }) 
-                
-                    
+                    channel.send(`${chapter_url} ${roleSpam}`)
+                })
+
+
             })
-            
+
 
         })
 

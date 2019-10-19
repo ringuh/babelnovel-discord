@@ -4,7 +4,7 @@ const { IsMention, IsUser, IsChannel } = require('../funcs/mentions')
 
 module.exports = {
     name: ['setting'],
-    description: 'Set a server setting',
+    description: 'Set a server setting (admin)',
     args: "<setting> <value>",
 
     async execute(message, args) {

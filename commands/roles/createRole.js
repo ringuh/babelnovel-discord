@@ -5,7 +5,7 @@ const setting = require('../setting')
 
 module.exports = {
     name: ['createrole'],
-    description: 'Creates a new role',
+    description: 'Creates a new role (admin)',
     args: "<role_name>",
     async execute(message, args) {
         if (!botPermission(message)) return false

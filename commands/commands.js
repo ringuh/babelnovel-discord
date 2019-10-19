@@ -1,5 +1,5 @@
 module.exports = {
-    name: ['commands', 'list', 'cmd', 'cmds', 'command'],
+    name: ['commands'],
     description: 'Lists available commands',
     args: false,
     execute(message, args) {
@@ -11,8 +11,8 @@ module.exports = {
             const commandFiles = require('fs').readdirSync(fPath, { withFileTypes: true }).filter(file => file.name.endsWith('.js'));
             
             for (const file of commandFiles) {
-                const command = require(path.join(fPath, file.name));
-                reply.push(`${command.name.join(" / ")} ${command.args+' ' || ''}-- ${command.description}`)
+                const cmd = require(path.join(fPath, file.name));
+                reply.push(`${cmd.name.join(" / ")} ${cmd.args ? cmd.args+" --": '--'} ${cmd.description}`)
             }
 
             folders.forEach(folder => {

@@ -5,7 +5,7 @@ const setting_key = 'latest_chapter_channel'
 
 module.exports = {
     name: ['defaultchannel'],
-    description: 'Sets default spam channel',
+    description: 'Sets default spam channel (admin)',
     args: "<channel>",
     async execute(message, args) {
         

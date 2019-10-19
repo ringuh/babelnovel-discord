@@ -4,7 +4,7 @@ const { Role } = require("../../models")
 
 module.exports = {
     name: ['managerole'],
-    description: 'Toggles role requests',
+    description: 'Toggles role request availability (admin)',
     args: "<role>",
     execute(message, args) {
         if (!isAdmin(message)) return false

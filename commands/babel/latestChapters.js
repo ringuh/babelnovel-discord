@@ -1,7 +1,9 @@
+const { RichEmbed } = require('discord.js')
 const TimeAgo = require('javascript-time-ago');
 const { LatestChapter } = require("../../models");
+const { api } = global.config
 const locale = require('javascript-time-ago/locale/en');
-
+const chapterLimit = 20
 TimeAgo.addLocale(locale)
 const timeAgo = new TimeAgo('en-US')
 
@@ -11,12 +13,11 @@ module.exports = {
     args: false,
     execute(message, args) {
         LatestChapter.findAll({
-            order: [["id", "desc"]],
-            limit: 15
+            order: [["publishTime", "desc"], ["createdAt", "desc"]],
+            limit: chapterLimit
         }).then(chapters => {
             let str = [`Latest chapters:`]
-            if (!chapters.length)
-                str.push("\tno chapters available")
+           
 
             chapters.map(chapter => {
                 let ago = timeAgo.format(new Date(`${chapter.publishTime}z`), "twitter")
@@ -24,7 +25,19 @@ module.exports = {
             });
             str.push('', "Available commands:", "!requestrole <role> -- adds available role to user")
             str.push("!managerole <role> -- adds/removes role as available (admin)")
-            message.channel.send(str.join("\n"), { code: false });
+
+            const announceEmbed = new RichEmbed()
+                .setColor('#0099ff')
+                .setDescription(`${chapterLimit} latest chapters on https://babelnovel.com/latest-update`)
+                .addBlankField()
+
+            chapters.map(chapter => {
+                let ago = timeAgo.format(new Date(`${chapter.publishTime}z`), "twitter")
+                announceEmbed.addField(`${chapter.bookName} - ${chapter.name} (${ago})`, `${chapter.Url()}`)
+            });
+
+            console.log(announceEmbed.length)
+            message.channel.send(announceEmbed);
         })
             .catch((err) => {
                 console.log(err.message)

@@ -5,7 +5,7 @@ const { AnnounceNovel, LatestChapter, Sequelize } = require("../../models")
 
 module.exports = {
     name: ['announcechapter', 'ac'],
-    description: 'Announces new chapters',
+    description: 'Announces new chapters (admin)',
     args: "<novel> [role] [channel]",
     async execute(message, args) {
         if (!isAdmin(message)) return false
