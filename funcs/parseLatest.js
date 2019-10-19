@@ -12,7 +12,7 @@ const parseLatest = async (client) => {
     try {
         const announceNovels = await AnnounceNovel.findAll({})
         const servers = await Setting.findAll({ where: { key: 'latest_chapter_channel' } })
-        const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
         const page = await browser.newPage();
         await page.goto("https://babelnovel.com");
         await page.goto(`${api.latest_chapters}?pageSize=${numerics.latest_chapter_count}`);
