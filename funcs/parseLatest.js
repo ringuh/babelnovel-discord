@@ -1,6 +1,6 @@
 const puppeteer = require('puppeteer');
 const urlTool = require('url')
-const { api, interval } = global.config;
+const { api, numerics } = global.config;
 const { AnnounceNovel, LatestChapter, Setting } = require('../models')
 
 const parseLatest = async (client) => {
@@ -15,7 +15,7 @@ const parseLatest = async (client) => {
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
         await page.goto("https://babelnovel.com");
-        await page.goto(`${api.latest_chapters}?pageSize=200`);
+        await page.goto(`${api.latest_chapters}?pageSize=${numerics.latest_chapter_count}`);
         await page.screenshot({ path: `babelshot.tmp.png` });
 
         const json = await page.evaluate(() => {
@@ -82,7 +82,7 @@ const LatestChapters = async (client) => {
 
     parseLatest(client)
 
-    //setInterval(() => parseLatest(client), interval.latest_chapters * 1000)
+    setInterval(() => parseLatest(client), numerics.latest_chapter_interval * 60000)
 };
 
 

@@ -1,9 +1,9 @@
 const { RichEmbed } = require('discord.js')
 const TimeAgo = require('javascript-time-ago');
 const { LatestChapter } = require("../../models");
-const { api } = global.config
+const { numerics } = global.config
 const locale = require('javascript-time-ago/locale/en');
-const chapterLimit = 20
+
 TimeAgo.addLocale(locale)
 const timeAgo = new TimeAgo('en-US')
 
@@ -14,7 +14,7 @@ module.exports = {
     execute(message, args) {
         LatestChapter.findAll({
             order: [["publishTime", "desc"], ["createdAt", "desc"]],
-            limit: chapterLimit
+            limit: latest_chapter_limit
         }).then(chapters => {
             let str = [`Latest chapters:`]
            
@@ -28,7 +28,7 @@ module.exports = {
 
             const announceEmbed = new RichEmbed()
                 .setColor('#0099ff')
-                .setDescription(`${chapterLimit} latest chapters on https://babelnovel.com/latest-update`)
+                .setDescription(`${numerics.latest_chapter_limit} latest chapters on https://babelnovel.com/latest-update`)
                 .addBlankField()
 
             chapters.map(chapter => {

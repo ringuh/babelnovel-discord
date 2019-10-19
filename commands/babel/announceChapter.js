@@ -16,14 +16,7 @@ module.exports = {
         if (!novelStr.length)
             return message.channel.send(`Role name missing`, { code: true });
 
-        const { Op, fn, col, where } = Sequelize
         const targetChapter = await LatestChapter.findOne({
-            /* where: {
-                [Op.or]: [
-                    { bookCanonicalName: novelStr },
-                    { bookName: novelStr },
-                ]
-            } */
             where: Sequelize.or(
                 Sequelize.where(
                     Sequelize.fn('lower', Sequelize.col('bookName')),
@@ -37,7 +30,7 @@ module.exports = {
         })
         if (!targetChapter) return message.channel.send(`Novel by name or alias '${novelStr}' not found`, { code: true });
         
-        let announceNovel = AnnounceNovel.findOrCreate({
+        await AnnounceNovel.findOrCreate({
             where: {
                 bookId: targetChapter.bookId,
                 server: message.guild.id,

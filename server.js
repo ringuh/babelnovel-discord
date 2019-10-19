@@ -3,7 +3,7 @@ const fs = require('fs');
 global.config = require('./config.json');
 const path = require('path')
 global.appRoot = path.resolve(__dirname);
-const LatestChapters = require('./funcs/latest_chapters')
+const parseLatest = require('./funcs/parseLatest')
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
 
@@ -32,7 +32,7 @@ client.once('ready', () => {
     console.log('Discord bot running!');
     client.user.setActivity(`${global.config.prefix}commands`, { type: "LISTENING" });
 
-    LatestChapters(client)
+    parseLatest(client)
     
     
     

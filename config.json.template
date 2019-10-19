@@ -10,7 +10,9 @@
     "api": {
         "latest_chapters": "https://babelnovel.com/api/chapters/latest"
     },
-    "interval": { 
-        "latest_chapters": 30
+    "numerics": { 
+        "latest_chapter_interval": 2,
+        "latest_chapter_count": 200,
+        "latest_chapter_limit": 20
     }
 }

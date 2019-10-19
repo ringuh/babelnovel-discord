@@ -1,7 +1,7 @@
 
 const { isAdmin, usageMessage, botPermission } = require('../../funcs/commandTools')
-const { IsChannel } = require('../../funcs/mentions.js')
-const setting = require('../setting')
+//const { IsChannel } = require('../../funcs/mentions.js')
+//const setting = require('../setting')
 
 module.exports = {
     name: ['createrole'],
