@@ -19,7 +19,7 @@ module.exports = {
 
     async save(message, key, val) {
         let [value, type] = IsMention(val, message.guild)
-
+        console.log(key, val)
         await Setting.findOrCreate({
             where: { server: message.guild.id, key: key },
             defaults: { value: value.id || value, type: type }
@@ -28,6 +28,7 @@ module.exports = {
                 setting.destroy().then(() => message.channel.send(`Deleted ${key}`))
 
             else {
+                setting.update({ value: value.id})
                 message.channel.send(`Saved ${key} as ${value}`)
             }
 

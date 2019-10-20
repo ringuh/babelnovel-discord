@@ -24,7 +24,7 @@ module.exports = {
             where: { server: message.guild.id, role: targetRole.id, type: "chapter_warning" }
         }).then(([role, created]) => {
             if (created) {
-                message.channel.send(`Enabling access to role '${targetRole.name}'`, { code: false });
+                message.channel.send(`Enabling access to role ${targetRole}`, { code: false });
             }
             else {
                 role.destroy().then(() => {

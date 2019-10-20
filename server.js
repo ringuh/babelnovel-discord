@@ -30,7 +30,8 @@ loadCommands(path.join(appRoot, "commands"))
 
 client.once('ready', () => {
     console.log('Discord bot running!');
-    client.user.setActivity(`${global.config.prefix}commands`, { type: "LISTENING" });
+    const commandJs = require('./commands/commands')
+    client.user.setActivity(`${global.config.prefix}${commandJs.name[0]}`, { type: "LISTENING" });
 
     BabelNovel(client)
 
@@ -43,8 +44,11 @@ client.on('message', message => {
     if (!message.content.startsWith(global.config.prefix) ||
         (message.author.bot && message.author.id !== "621467973122654238"))
         return;
-
-    const args = message.content.slice(global.config.prefix.length).split(/ +/);
+    // mobile discord wants to offer ! command instead of !command
+    if(message.content.startsWith(`${global.config.prefix} `))
+        message.content = message.content.replace(`${global.config.prefix} `, global.config.prefix)
+    
+        const args = message.content.slice(global.config.prefix.length).split(/ +/);
     const command = args.shift().toLowerCase();
 
     if (!client.commands.has(command)) return;

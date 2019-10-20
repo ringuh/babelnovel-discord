@@ -1,5 +1,6 @@
 
 const { isAdmin, usageMessage, botPermission } = require('../../funcs/commandTools')
+const manageRole = require('./manageRole')
 //const { IsChannel } = require('../../funcs/mentions.js')
 //const setting = require('../setting')
 
@@ -22,6 +23,10 @@ module.exports = {
             name: name,
             mentionable: true
         }, `Created by ${message.member}`
-        ).then(role => message.channel.send(`Role ${role} created`, { code: false }))
+        ).then(role => {
+            message.channel.send(`Role ${role} created`, { code: false })
+            manageRole.execute(message, args)
+        })
+            
     },
 };

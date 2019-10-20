@@ -4,12 +4,12 @@ const { TrackNovel, Setting } = require('../../models')
 const { red } = chalk.bold
 
 const trackNovels = async (browser, client) => {
-    console.log("tracking novels")
     const trackedNovels = await TrackNovel.findAll({
         include: ['novel']
     })
+    console.log("tracking novels", trackedNovels.length)
     if (!trackedNovels.length) return true
-
+    
     try {
         const page = await browser.newPage();
         // fetch cookie
@@ -29,7 +29,6 @@ const trackNovels = async (browser, client) => {
                     continue
 
                 json.lastChapter.bookCanonicalName = trackedNovel.canonicalName
-                
                 chapter = await trackedNovel.jsonToChapter(json.lastChapter, true)
             }
 

@@ -4,7 +4,7 @@ const { StripMentions } = require('../../funcs/mentions.js')
 const { TrackNovel, Novel, Sequelize } = require("../../models")
 
 module.exports = {
-    name: ['tracknovel', 'tn'],
+    name: ['tracknovel'],
     description: 'Announces new chapters for a novel (admin)',
     args: "<novel> [role] [channel]",
     async execute(message, args) {

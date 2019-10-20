@@ -14,17 +14,15 @@ module.exports = {
     execute(message, args) {
         Chapter.findAll({
             order: [["publishTime", "desc"], ["createdAt", "desc"]],
+            include: ['novel'],
             limit: numerics.latest_chapter_limit
         }).then(chapters => {
-            let str = [`Latest chapters:`]
-           
+          
 
             chapters.map(chapter => {
                 let ago = timeAgo.format(new Date(`${chapter.publishTime}z`), "twitter")
                 str.push(`${chapter.Url()} - ${ago}`)
             });
-            str.push('', "Available commands:", "!requestrole <role> -- adds available role to user")
-            str.push("!managerole <role> -- adds/removes role as available (admin)")
 
             const announceEmbed = new RichEmbed()
                 .setColor('#0099ff')
@@ -33,7 +31,7 @@ module.exports = {
 
             chapters.map(chapter => {
                 let ago = timeAgo.format(new Date(`${chapter.publishTime}z`), "twitter")
-                announceEmbed.addField(`${chapter.bookName} - ${chapter.name} (${ago})`, `${chapter.Url()}`)
+                announceEmbed.addField(`${chapter.novel.name} - ${chapter.name} (${ago})`, `${chapter.Url()}`)
             });
 
             message.channel.send(announceEmbed);

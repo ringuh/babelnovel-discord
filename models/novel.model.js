@@ -125,7 +125,7 @@ module.exports = function (sequelize, type) {
     }
 
     Model.prototype.fetchJson = async function (page) {
-    
+        console.log(this.name)
         if (!page || !this.babelId) return null
         const fetch_url = api.novel.replace("<book>", this.babelId)
         await page.goto(fetch_url)
@@ -135,17 +135,19 @@ module.exports = function (sequelize, type) {
         
         if (!json || json.code !== 0 || json.data.length === 0)
             return null
-        this.isPay = json.data.isPay
+        
+        let tmp = {...json.data, author: null, id: this.id }
+        console.log(tmp)
         if (json.data.author) {
-            this.author = json.data.author.name || this.author
-            this.authorEn = json.data.author.enName || this.authorEn
+            tmp.author = json.data.author.name || this.author
+            tmp.authorEn = json.data.author.enName || this.authorEn
         }
         if (json.data.source) {
-            this.source_name = json.data.source.name || this.source_name
-            this.source_url = json.data.source.url || this.source_url
+            tmp.source_name = json.data.source.name || this.source_name
+            tmp.source_url = json.data.source.url || this.source_url
         }
 
-        await this.save()
+        await this.update(tmp)
 
         return json.data
 

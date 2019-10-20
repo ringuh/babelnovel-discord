@@ -1,13 +1,16 @@
 const urlTool = require('url')
 const chalk = require('chalk')
 const { api } = global.config;
-const { Novel } = require('../../models')
+const { Novel, TrackNovel } = require('../../models')
 const { red } = chalk.bold
 
 const fetchNovels = async (browser, client) => {
     console.log("fetching novels")
     /* const novels = await Novel.findAll({})
     if (novels.length) return true */
+    const excludedNovels = await TrackNovel.findAll({
+        include: ['novel']
+    }).map(n => n.novel.babelId)
 
     try {
         const page = await browser.newPage();
@@ -30,9 +33,13 @@ const fetchNovels = async (browser, client) => {
                 const novelData = json.data[i]
                 novelData.babelId = novelData.id
                 delete novelData.id
+
+                if (excludedNovels.includes(novelData.babelId))
+                    continue
+
                 novelData.cover = novelData.cover ? urlTool.parse(novelData.cover).href : null
                 novelData.genre = novelData.genres.map(genre => genre.name).filter(n => n).join(" | ")
-                
+
                 const novel = await Novel.findOrCreate({
                     where: {
                         babelId: novelData.babelId
