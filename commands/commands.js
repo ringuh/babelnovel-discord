@@ -1,5 +1,5 @@
 module.exports = {
-    name: ['commands'],
+    name: ['cmds'],
     description: 'Lists available commands',
     args: false,
     execute(message, args) {

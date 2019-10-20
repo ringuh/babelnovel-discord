@@ -20,7 +20,7 @@ const BabelNovel = async (client) => {
     let browser = await launchBrowser()
     if(process.argv.includes("init"))
         await fetchNovels(browser, client)
-    await fetchLatest(browser, client)
+    //await fetchLatest(browser, client)
     //await trackNovels(browser, client)
     
     // check tracked novels
