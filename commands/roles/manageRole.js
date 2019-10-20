@@ -1,5 +1,6 @@
 
 const { isAdmin, usageMessage } = require('../../funcs/commandTools')
+const { StripMentions } = require('../../funcs/mentions.js')
 const { Role } = require("../../models")
 
 module.exports = {
@@ -10,15 +11,12 @@ module.exports = {
         if (!isAdmin(message)) return false
         if (args.length < 1) return usageMessage(message, this)
 
-        let roleStr = args.join(" ").trim().toLowerCase()
-        const targetRole = message.guild.roles.find(role => role.name.toLowerCase() == roleStr)
-
-        if (!targetRole)
-            return message.channel.send(`Role '${roleStr}' not found`, { code: true });
+        let [roleStr, userMentions, channelMentions, roleMentions] = StripMentions(message.guild, args)
+        const targetRole = roleMentions[0] || message.guild.roles.find(r => r.name.toLowerCase() == roleStr.toLowerCase())
+        if (!targetRole) return message.channel.send(`Role '${roleStr}' not found`, { code: true });
 
         if (targetRole.hasPermission("ADMINISTRATOR"))
-            return message.channel.send(`Managing admin roles forbidden`, { code: true });
-
+            return message.channel.send(`Managing admin roles is forbidden`, { code: true });
 
         Role.findOrCreate({
             where: { server: message.guild.id, role: targetRole.id, type: "chapter_warning" }
@@ -35,7 +33,7 @@ module.exports = {
             console.log(err.message)
             throw err
         })
-        
+
 
 
     },

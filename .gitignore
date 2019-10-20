@@ -1,5 +1,7 @@
 *.tmp 
 *.tmp.png
+*.tmp.pdf
+screenshotChapter.js
 package-lock.json
 config.json
 .vscode/

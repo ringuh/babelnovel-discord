@@ -22,7 +22,6 @@ const fetchLatest = async (browser, client) => {
         await page.close()
 
         if (!json || json.code !== 0 || !json.data.length) return true
-        //console.log(json.data[0], json.data.length)
 
         const arr = json.data.reverse()
         for (var i in arr) {

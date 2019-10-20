@@ -18,24 +18,11 @@ module.exports = {
             include: ['novel'],
         });
 
-        console.log(novels.length)
-
-
         let msg = [`Tracked novels (${novels.length}):`, '']
         if(!novels.length) msg.push("not tracking any novels")
 
         for (var i in novels) {
             const n = novels[i]
-            console.log(n.novel.name)
-            /*  const channels = n.channels ? await n.channels.split(",").map(channel_id => {
-                 const channel = message.guild.channels.get(channel_id)
-                 return `@${channel.name}`
-             }).filter(c => c) : ["<defaultchannel>"]
- 
-             const roles = n.roles ? await n.roles.split(",").map(role_id => {
-                 const role = message.guild.roles.get(role_id)
-                 return `@${role.name}`
-             }).filter(r => r) : ["no notifications"] */
 
             const [channels, roles] = ['channels', 'roles'].map(k => {
                 return n[k] ? n[k].split(",").map(k_id => {
@@ -50,9 +37,6 @@ module.exports = {
 
         }
 
-        
         message.channel.send(msg, { code: true });
-
-
     },
 };
