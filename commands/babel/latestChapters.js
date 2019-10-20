@@ -1,6 +1,6 @@
 const { RichEmbed } = require('discord.js')
 const TimeAgo = require('javascript-time-ago');
-const { LatestChapter } = require("../../models");
+const { Chapter } = require("../../models");
 const { numerics } = global.config
 const locale = require('javascript-time-ago/locale/en');
 
@@ -12,7 +12,7 @@ module.exports = {
     description: 'Lists latest chapters',
     args: false,
     execute(message, args) {
-        LatestChapter.findAll({
+        Chapter.findAll({
             order: [["publishTime", "desc"], ["createdAt", "desc"]],
             limit: numerics.latest_chapter_limit
         }).then(chapters => {
@@ -36,7 +36,6 @@ module.exports = {
                 announceEmbed.addField(`${chapter.bookName} - ${chapter.name} (${ago})`, `${chapter.Url()}`)
             });
 
-            console.log(announceEmbed.length)
             message.channel.send(announceEmbed);
         })
             .catch((err) => {

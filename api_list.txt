@@ -1,0 +1,8 @@
+https://babelnovel.com/api/chapters/latest?page=0&pageSize=100
+https://babelnovel.com/api/books?page=0&pageSize=20 (20 max)
+https://babelnovel.com/api/books/0a73d4f5-52a4-422e-bfa8-ceb041cc41ef
+https://babelnovel.com/api/books/heavenly-super-spoiler-chat-group/chapters/c10
+https://babelnovel.com/api/books/0a73d4f5-52a4-422e-bfa8-ceb041cc41ef/chapters?bookId=0a73d4f5-52a4-422e-bfa8-ceb041cc41ef&pageSize=50&page=4&fields=id,name,canonicalName,hasContent,type,translateStatus,publishTime,isBought,isFree,isLimitFree
+
+
+

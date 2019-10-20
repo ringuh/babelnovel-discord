@@ -19,6 +19,7 @@
     "homepage": "https://github.com/ringuh/babelnovel-discord#readme",
     "dependencies": {
         "axios": "^0.19.0",
+        "chalk": "^2.4.2",
         "discord.js": "^11.5.1",
         "javascript-time-ago": "^2.0.2",
         "puppeteer": "^1.20.0",

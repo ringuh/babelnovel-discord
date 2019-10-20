@@ -8,10 +8,15 @@
         "logging": false
     },
     "api": {
-        "latest_chapters": "https://babelnovel.com/api/chapters/latest"
+        "latest_chapters": "https://babelnovel.com/api/chapters/latest",
+        "novels": "https://babelnovel.com/api/books?page=<pageNr>&pageSize=<pageSize>",
+        "novel": "https://babelnovel.com/api/books/<book>",
+        "novel_home": "https://babelnovel.com/books/<book>"
     },
-    "numerics": { 
-        "latest_chapter_interval": 2,
+     "numerics": { 
+        "book_interval_hours": 24,  
+        "latest_chapter_interval_minutes": 20.2,
+        "track_novel_interval_minutes": 2,
         "latest_chapter_count": 200,
         "latest_chapter_limit": 20
     }

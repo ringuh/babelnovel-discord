@@ -1,11 +1,11 @@
 
 const { isAdmin, usageMessage } = require('../../funcs/commandTools')
 const { StripMentions } = require('../../funcs/mentions.js')
-const { AnnounceNovel, LatestChapter, Sequelize } = require("../../models")
+const { TrackNovel, Novel, Sequelize } = require("../../models")
 
 module.exports = {
-    name: ['announcechapter', 'ac'],
-    description: 'Announces new chapters (admin)',
+    name: ['tracknovel', 'tn'],
+    description: 'Announces new chapters for a novel (admin)',
     args: "<novel> [role] [channel]",
     async execute(message, args) {
         if (!isAdmin(message)) return false
@@ -16,36 +16,35 @@ module.exports = {
         if (!novelStr.length)
             return message.channel.send(`Role name missing`, { code: true });
 
-        const targetChapter = await LatestChapter.findOne({
+        const novel = await Novel.findOne({
             where: Sequelize.or(
                 Sequelize.where(
-                    Sequelize.fn('lower', Sequelize.col('bookName')),
+                    Sequelize.fn('lower', Sequelize.col('name')),
                     Sequelize.fn('lower', novelStr)
                 ),
                 Sequelize.where(
-                    Sequelize.fn('lower', Sequelize.col('bookCanonicalName')),
+                    Sequelize.fn('lower', Sequelize.col('canonicalName')),
                     Sequelize.fn('lower', novelStr)
                 )
             )
         })
-        if (!targetChapter) return message.channel.send(`Novel by name or alias '${novelStr}' not found`, { code: true });
+        if (!novel) return message.channel.send(`Novel by name or alias '${novelStr}' not found`, { code: true });
         
-        await AnnounceNovel.findOrCreate({
+        await TrackNovel.findOrCreate({
             where: {
-                bookId: targetChapter.bookId,
+                novel_id: novel.id,
                 server: message.guild.id,
             }, defaults: {
                 channels: channelMentions.length ? channelMentions.map(cm => cm.id).join(): null,
                 roles: roleMentions.length ?  roleMentions.map(rm => rm.id).join(): null,
             }
         }).then(([ac, created]) => {
-            console.log(ac.channels, ac.roles)
             if (!created) return ac.destroy().then(() =>
                 message.channel.send(
-                    `Removing announcement from '${targetChapter.bookName}'.\nRun this command again if you wanted to edit the announcement.`, { code: true })
+                    `Removing announcement from '${novel.name}'.\nRun this command again if you wanted to edit the announcement.`, { code: true })
             )
             message.channel.send(
-                `Added announcement for '${targetChapter.bookName}'.`, { code: true })
+                `Added announcement for '${novel.name}'.`, { code: true })
         })
     }
 };

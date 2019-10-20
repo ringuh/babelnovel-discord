@@ -1,14 +1,10 @@
 module.exports = function(sequelize, type) {
-    const Model = sequelize.define('LatestChapter', {
+    const Model = sequelize.define('Chapter', {
         id: {
             type: type.INTEGER,
             autoIncrement: true,
             primaryKey: true,
         },
-       /*  server: {
-            type: type.STRING,
-            allowNull: false,
-        }, */
         bookId: {
             type: type.STRING
         },
@@ -22,7 +18,10 @@ module.exports = function(sequelize, type) {
             type: type.STRING
         },
         content: {
-            type: type.STRING
+            type: type.TEXT
+        },
+        summary: {
+            type: type.TEXT
         },
         type: {
             type: type.STRING
@@ -87,6 +86,15 @@ module.exports = function(sequelize, type) {
     Model.prototype.Url = function(){
         return `https://babelnovel.com/books/${this.bookCanonicalName}/chapters/${this.canonicalName}`
     }
+
+    Model.associate = models => {
+		Model.belongsTo(models.Novel, {
+			onDelete: "CASCADE",
+            foreignKey: 'novel_id',
+            allowNull: false,
+            as: 'novel'
+		})
+	};
 
     return Model;
 }
