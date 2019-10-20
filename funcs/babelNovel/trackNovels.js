@@ -25,8 +25,8 @@ const trackNovels = async (browser, client) => {
             // if same novel is tracked on multiple discord servers bypass fetch after the first one
             if (!chapter) {
                 let json = await trackedNovel.fetchJson(page)
-                /* if (json.lastChapter.id === trackedNovel.lastChapterBabelId)
-                    continue */
+                if (json.lastChapter.id === trackedNovel.lastChapterBabelId)
+                    continue
 
                 json.lastChapter.bookCanonicalName = trackedNovel.canonicalName
                 
