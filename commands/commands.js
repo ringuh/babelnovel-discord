@@ -4,7 +4,7 @@ module.exports = {
     args: false,
     execute(message, args) {
         path = require('path')
-        var reply = ["Available !commands:"]
+        var reply = [`Available ${global.config.prefix}${this.name[0]}:`]
         const dirs = (fPath) => {
             
             const folders = require('fs').readdirSync(fPath, { withFileTypes: true }).filter(file => file.isDirectory());
