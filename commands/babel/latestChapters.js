@@ -17,13 +17,7 @@ module.exports = {
             include: ['novel'],
             limit: numerics.latest_chapter_limit
         }).then(chapters => {
-          
-
-            chapters.map(chapter => {
-                let ago = timeAgo.format(new Date(`${chapter.publishTime}z`), "twitter")
-                str.push(`${chapter.Url()} - ${ago}`)
-            });
-
+            
             const announceEmbed = new RichEmbed()
                 .setColor('#0099ff')
                 .setDescription(`${numerics.latest_chapter_limit} latest chapters on https://babelnovel.com/latest-update`)

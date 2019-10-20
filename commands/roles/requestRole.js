@@ -7,7 +7,9 @@ module.exports = {
     name: ['requestrole'],
     description: 'Requests a role to user',
     args: "[user] <role>",
+    permissions: ["ADMINISTRATOR"],
     async execute(message, args) {
+        
         if (args.length < 1) return usageMessage(message, this)
 
         let [roleStr, userMentions, channelMentions, roleMentions] = StripMentions(message.guild, args)

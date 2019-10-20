@@ -1,5 +1,5 @@
 
-const { isAdmin, usageMessage, botPermission } = require('../../funcs/commandTools')
+const { isAdmin, usageMessage } = require('../../funcs/commandTools')
 const manageRole = require('./manageRole')
 //const { IsChannel } = require('../../funcs/mentions.js')
 //const setting = require('../setting')
@@ -8,11 +8,10 @@ module.exports = {
     name: ['createrole'],
     description: 'Creates a new role (admin)',
     args: "<role_name>",
+    permissions: ["ADMINISTRATOR"],
     async execute(message, args) {
-        if (!botPermission(message)) return false
         if (!isAdmin(message)) return false
         if (args.length < 1) return usageMessage(message, this)
-        
         
         const name = args.join(" ").trim()
         const role_exists = message.guild.roles.some(role => role.name.toLowerCase() === name.toLowerCase());

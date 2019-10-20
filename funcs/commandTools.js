@@ -16,13 +16,21 @@ const CommandTools = {
             { code: true })
     },
 
-    botPermission: (message, permission = "ADMINISTRATOR") => {
-        const botPermissionsFor = message.channel.permissionsFor(message.guild.me)
-        if (!botPermissionsFor.has(permission)) {
-            message.channel.send(`Bot is missing permission ${permission}`, { code: true })
-            return false
-        }
-        return true
+    botPermission: (message, permissions) => {
+        if(!permissions) return true
+        if(typeof(permissions) === "string")
+            permissions = [permissions]
+        
+        
+        const response = !permissions.some(permission => {
+            const botPermissionsFor = message.channel.permissionsFor(message.guild.me)
+            if (!botPermissionsFor.has(permission)) {
+                message.channel.send(`Bot is missing permission ${permission}`, { code: true })
+                return true
+            }
+        })
+       
+        return response
     }
 };
 

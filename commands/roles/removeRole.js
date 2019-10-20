@@ -6,6 +6,7 @@ module.exports = {
     name: ['removerole'],
     description: 'Removes role from user',
     args: "[user] <role>",
+    permissions: ["ADMINISTRATOR"],
     execute(message, args) {
         if (args.length < 1) return usageMessage(message, this)
 

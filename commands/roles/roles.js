@@ -6,6 +6,7 @@ module.exports = {
     name: ['roles'],
     description: 'Lists all available roles',
     args: false,
+    permissions: "ADMINISTRATOR",
     execute(message, args) {
         Role.findAll({ where: { server: message.guild.id } })
             .then(roles => {
@@ -14,7 +15,8 @@ module.exports = {
                     str.push("\tno roles available")
                 roles.map(listedRole => {
                     const role = message.guild.roles.get(listedRole.role)
-                    str.push(`${role.name} ${!role ? `(NOT FOUND)` : ''}`)
+                    if(!role) listedRole.destroy()
+                    else str.push(`${role.name}`)
                 });
                 str.push('', "Available commands:")
                 //str.push("!managerole <role> -- adds/removes role as available (admin)")

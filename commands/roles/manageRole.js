@@ -7,7 +7,9 @@ module.exports = {
     name: ['managerole'],
     description: 'Toggles role request availability (admin)',
     args: "<role>",
+    permissions: ["ADMINISTRATOR"],
     execute(message, args) {
+
         if (!isAdmin(message)) return false
         if (args.length < 1) return usageMessage(message, this)
 

@@ -4,6 +4,7 @@ global.config = require('./config.json');
 const path = require('path')
 global.appRoot = path.resolve(__dirname);
 const { BabelNovel } = require('./funcs/babelNovel')
+const { botPermission } = require('./funcs/commandTools')
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
 
@@ -54,9 +55,11 @@ client.on('message', message => {
     if (!client.commands.has(command)) return;
 
     try {
-        client.commands.get(command).execute(message, args);
+        let cmd = client.commands.get(command)
+        if(botPermission(message, cmd.permissions))
+            cmd.execute(message, args);
     } catch (error) {
-        console.error(error);
+        console.error(error.message);
         message.reply('there was an error trying to execute that command!');
     }
 });
