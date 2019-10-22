@@ -8,7 +8,7 @@ module.exports = {
     name: ['createrole'],
     description: 'Creates a new role (admin)',
     args: "<role_name>",
-    permissions: ["ADMINISTRATOR"],
+    permissions: ["MANAGE_ROLES"],
     async execute(message, args) {
         if (!isAdmin(message)) return false
         if (args.length < 1) return usageMessage(message, this)

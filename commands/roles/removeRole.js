@@ -6,7 +6,7 @@ module.exports = {
     name: ['removerole'],
     description: 'Removes role from user',
     args: "[user] <role>",
-    permissions: ["ADMINISTRATOR"],
+    permissions: ["MANAGE_ROLES"],
     execute(message, args) {
         if (args.length < 1) return usageMessage(message, this)
 
@@ -36,7 +36,9 @@ module.exports = {
 
                     user.removeRole(role.id).then(() =>
                         message.channel.send(`Removing role '${role.name}' from ${user}`, { code: false })
-                    )
+                    ).catch(err => {
+                        return message.channel.send(`${err.message}. Role '${role.name}' is propably higher in the hierarchy than your bot `, { code: true });
+                    })
 
                 })
         })

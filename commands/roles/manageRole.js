@@ -7,8 +7,8 @@ module.exports = {
     name: ['managerole'],
     description: 'Toggles role request availability (admin)',
     args: "<role>",
-    permissions: ["ADMINISTRATOR"],
-    execute(message, args) {
+    permissions: ["MANAGE_ROLES"],
+    async execute(message, args) {
 
         if (!isAdmin(message)) return false
         if (args.length < 1) return usageMessage(message, this)
@@ -20,6 +20,13 @@ module.exports = {
         if (targetRole.hasPermission("ADMINISTRATOR"))
             return message.channel.send(`Managing admin roles is forbidden`, { code: true });
 
+        const error = await targetRole.edit({ color: targetRole.color })
+            .then(updated => null)
+            .catch(err => err);
+        if(error){
+            return message.channel.send(`${error.message}. Role '${targetRole.name}' is propably higher in the hierarchy than your bot `, { code: true });
+        }
+            
         Role.findOrCreate({
             where: { server: message.guild.id, role: targetRole.id, type: "chapter_warning" }
         }).then(([role, created]) => {

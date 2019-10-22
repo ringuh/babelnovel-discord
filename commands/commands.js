@@ -1,3 +1,5 @@
+const { botPermission } = require('../funcs/commandTools')
+
 module.exports = {
     name: ['cmds'],
     description: 'Lists available commands',
@@ -7,12 +9,13 @@ module.exports = {
         var reply = [`Available ${global.config.prefix}${this.name[0]}:`]
         const dirs = (fPath) => {
             
-            const folders = require('fs').readdirSync(fPath, { withFileTypes: true }).filter(file => file.isDirectory());
+            const folders = require('fs').readdirSync(fPath, { withFileTypes: true }).filter(file => file.isDirectory() && file.name !== 'hidden');
             const commandFiles = require('fs').readdirSync(fPath, { withFileTypes: true }).filter(file => file.name.endsWith('.js'));
             
             for (const file of commandFiles) {
                 const cmd = require(path.join(fPath, file.name));
-                reply.push(`${cmd.name.join(" / ")} ${cmd.args ? cmd.args+" --": '--'} ${cmd.description}`)
+                if(botPermission(message, cmd.permissions, true))
+                    reply.push(`${cmd.name.join(" / ")} ${cmd.args ? cmd.args+" --": '--'} ${cmd.description}`)
             }
 
             folders.forEach(folder => {

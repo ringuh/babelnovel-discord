@@ -7,9 +7,9 @@ module.exports = {
     name: ['requestrole'],
     description: 'Requests a role to user',
     args: "[user] <role>",
-    permissions: ["ADMINISTRATOR"],
+    permissions: ["MANAGE_ROLES"],
     async execute(message, args) {
-        
+
         if (args.length < 1) return usageMessage(message, this)
 
         let [roleStr, userMentions, channelMentions, roleMentions] = StripMentions(message.guild, args)
@@ -38,8 +38,10 @@ module.exports = {
 
                     user.addRole(role.id).then(() =>
                         message.channel.send(
-                            `Adding role '${role.name}' to ${user}`, { code: false }))
-
+                            `Adding role '${role.name}' to ${user}`, { code: false })
+                    ).catch(err => {
+                        return message.channel.send(`${err.message}. Role '${role.name}' is propably higher in the hierarchy than your bot `, { code: true });
+                    })
                 })
         })
 

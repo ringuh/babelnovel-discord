@@ -6,7 +6,7 @@ module.exports = {
     name: ['roles'],
     description: 'Lists all available roles',
     args: false,
-    permissions: "ADMINISTRATOR",
+    permissions: "MANAGE_ROLES",
     execute(message, args) {
         Role.findAll({ where: { server: message.guild.id } })
             .then(roles => {
