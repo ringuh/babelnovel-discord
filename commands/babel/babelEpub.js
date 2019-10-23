@@ -94,7 +94,7 @@ module.exports = {
 
         path = `${path}/${fn}.epub`
 
-        //if (fs.existsSync(path)) return path
+        if (fs.existsSync(path)) return path
 
         const option = {
             title: `${novel.name} ${chapters[0].index}-${chapters[chapters.length - 1].index}`, // *Required, title of the book.
