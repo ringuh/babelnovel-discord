@@ -5,6 +5,7 @@ const { Novel, Chapter, Sequelize } = require("../../models")
 const { scrapeNovel } = require("../../funcs/scrapeBabel")
 const { RichEmbed } = require('discord.js')
 const fs = require('fs')
+const pathTool = require('path')
 const Epub = require("epub-gen");
 
 
@@ -88,7 +89,9 @@ module.exports = {
         let author = [novel.authorEn, novel.author].filter(n => n).join(" | ")
         let fn = `${novel.canonicalName}_${chapters[0].index}-${chapters[chapters.length - 1].index}`
 
-        let path = `./static/epub`
+        console.log(__dirname, __filename)
+        let path = pathTool.join(__dirname, `../../static/epub`)
+        console.log(path)
 
         if (!fs.existsSync(path)) fs.mkdirSync(path)
 
