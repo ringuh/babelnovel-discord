@@ -5,7 +5,11 @@ const Sequelize = require('sequelize');
 const config = require('../config.json');
 let db = {};
 
-const sequelize = new Sequelize(config.db)
+const sequelize = new Sequelize(
+    global.config.db.database,
+    global.config.db.user,
+    global.config.db.pass,
+    global.config.db.options);
 
 sequelize
     .authenticate()

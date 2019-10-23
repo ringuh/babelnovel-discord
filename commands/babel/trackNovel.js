@@ -14,7 +14,7 @@ module.exports = {
         let [novelStr, userMentions, channelMentions, roleMentions] = StripMentions(message.guild, args)
 
         if (!novelStr.length)
-            return message.channel.send(`Role name missing`, { code: true });
+            return message.channel.send(`Novel name missing`, { code: true });
 
         const novel = await Novel.findOne({
             where: Sequelize.or(

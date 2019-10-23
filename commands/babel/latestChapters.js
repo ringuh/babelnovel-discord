@@ -1,6 +1,6 @@
 const { RichEmbed } = require('discord.js')
 const TimeAgo = require('javascript-time-ago');
-const { Chapter } = require("../../models");
+const { Chapter, Sequelize } = require("../../models");
 const { numerics } = global.config
 const locale = require('javascript-time-ago/locale/en');
 
@@ -8,31 +8,40 @@ TimeAgo.addLocale(locale)
 const timeAgo = new TimeAgo('en-US')
 
 module.exports = {
-    name: ['latestchapters', "lc"],
+    name: ['latestchapters'],
     description: 'Lists latest chapters',
-    args: false,
+    args: "[genre]",
     execute(message, args) {
-        Chapter.findAll({
+
+        let queryStr = {
             order: [["publishTime", "desc"], ["createdAt", "desc"]],
             include: ['novel'],
             limit: numerics.latest_chapter_limit
-        }).then(chapters => {
-            
+        }
+
+        const novelStr = args.length ? args.join(' ').trim() : ""
+        if (novelStr.length)
+            queryStr.where = { isFree: true, '$novel.genre$': { [Sequelize.Op.iLike]: `%${novelStr}%` } }
+
+
+        Chapter.findAll(queryStr).then(chapters => {
             const announceEmbed = new RichEmbed()
                 .setColor('#0099ff')
-                .setDescription(`${numerics.latest_chapter_limit} latest chapters on https://babelnovel.com/latest-update`)
+                .setDescription(`${numerics.latest_chapter_limit} latest ${novelStr} chapters on https://babelnovel.com/latest-update`)
                 .addBlankField()
 
-            chapters.map(chapter => {
+            chapters.filter(c => c.publishTime).map(chapter => {
                 let ago = timeAgo.format(new Date(`${chapter.publishTime}z`), "twitter")
                 announceEmbed.addField(`${chapter.novel.name} - ${chapter.name} (${ago})`, `${chapter.Url()}`)
             });
 
+            if (!chapters.length)
+                announceEmbed.addField(`No chapters found`, `Category: ${novelStr}`)
+
             message.channel.send(announceEmbed);
+        }).catch((err) => {
+            console.log(err.message)
+            throw err
         })
-            .catch((err) => {
-                console.log(err.message)
-                throw err
-            })
     },
 };

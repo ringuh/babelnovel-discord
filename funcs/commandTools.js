@@ -9,6 +9,10 @@ const CommandTools = {
         return true
     },
 
+    isBypass: (message) => {
+        return bypass_list.includes(message.member.id)
+    },
+
     usageMessage: (message, command) => {
 
         message.channel.send(
@@ -16,7 +20,7 @@ const CommandTools = {
             { code: true })
     },
 
-    botPermission: (message, permissions, no_message) => {
+    botPermission: (message, permissions, reply=true) => {
         if (!permissions) return true
         if (typeof (permissions) === "string")
             permissions = [permissions]
@@ -26,7 +30,7 @@ const CommandTools = {
 
         const response = !permissions.some(permission => {
             if (!botPermissionsFor.has(permission)) {
-                if(!no_message)
+                if(reply)
                     message.channel.send(`Bot is missing permission ${permission}`, { code: true })
                 return true
             }

@@ -16,11 +16,24 @@ const launchBrowser = async (nBrowser = browser) => {
     return nBrowser
 }
 
+const checkInit = () => {
+    try {
+        
+        const { dbToJson, jsonToDb } = require('../scrapeBabel/dbThings');
+        //dbToJson();
+        if (process.argv.includes("reset")) {
+            jsonToDb()
+        }
+    } catch (err) { console.log(err.message) }
+}
+
 const BabelNovel = async (client) => {
+    checkInit()
+
     browser = await launchBrowser()
     if (process.argv.includes("init"))
-        await fetchNovels(browser, client)
-
+        return await fetchNovels(browser, client)
+    
     // check tracked novels
     setInterval(async () => {
         browser = await launchBrowser(browser)

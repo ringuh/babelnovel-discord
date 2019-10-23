@@ -7,6 +7,8 @@
 * **create announcable roles** and allow users to **request and remove** those roles them by **theirselves**
 * **list latest chapters** on babelnovel.com
 
+### if you wish to disable role-commands just disable bots access to "MANAGE_ROLES"
+
 &nbsp;
 
 ---

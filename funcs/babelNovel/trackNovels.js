@@ -51,7 +51,7 @@ const trackNovels = async (browser, client) => {
             const roles = announcement.roles ? announcement.roles.split(",").map(role_id =>
                 guild.roles.get(role_id)).filter(role => role) : []
 
-            const chapter_url = chapter.Url()
+            const chapter_url = chapter.Url(trackedNovel)
             const roleSpam = roles.join(" ")
 
             announcement.channels.split(",").map(async channel_id => {

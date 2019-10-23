@@ -1,4 +1,5 @@
-const { api } = global.config
+const { api, numerics } = global.config
+const urlTool = require('url')
 
 module.exports = function (sequelize, type) {
     const Model = sequelize.define('Novel', {
@@ -31,9 +32,10 @@ module.exports = function (sequelize, type) {
         },
         cover: { // 78c8d251-1812-4927-bbe2-d0d3bcdef976
             type: type.STRING,
-            /* validate: {
-                isUrl: true
-            } */
+            set(val) {
+                val = val ? urlTool.parse(val).href : null
+                this.setDataValue('cover', val)
+            }
         },
         name: { // Martial Arts Peak
             type: type.STRING,
@@ -100,6 +102,11 @@ module.exports = function (sequelize, type) {
     }, {
         timestamps: true,
     });
+    Model.prototype.Url = function (apilink = false) {
+        if (apilink)
+            return api.novel.replace("<book>", this.canonicalName)
+        return api.novel.replace("/api/", "/").replace("<book>", this.canonicalName)
+    }
 
     Model.prototype.jsonToChapter = function (chapterData, update) {
         if (!chapterData) return null
@@ -132,12 +139,12 @@ module.exports = function (sequelize, type) {
         let json = await page.evaluate(() => {
             return JSON.parse(document.querySelector("body").innerText);
         });
-        
+
         if (!json || json.code !== 0 || json.data.length === 0)
             return null
+
+        let tmp = { ...json.data, author: null, id: this.id }
         
-        let tmp = {...json.data, author: null, id: this.id }
-        console.log(tmp)
         if (json.data.author) {
             tmp.author = json.data.author.name || this.author
             tmp.authorEn = json.data.author.enName || this.authorEn
@@ -152,6 +159,49 @@ module.exports = function (sequelize, type) {
         return json.data
 
     }
+
+    Model.prototype.scrapeChapters = async function (page) {
+        if (!page || !this.babelId) return null
+        let chapters = []
+        let json = { "data": [1], code: 0 }
+        let pageNr = 0
+        while (json.code === 0 && json.data.length) {
+            let url = api.novel_chapters
+                .replace(/<book>/gi, this.babelId)
+                .replace("<pageNr>", pageNr)
+                .replace("<pageSize>", numerics.novel_chapters_count)
+            console.log(url)
+            await page.goto(url)
+            //await page.screenshot({ path: "screenshot.tmp.png" })
+            json = await page.evaluate(() => {
+                return JSON.parse(document.querySelector("body").innerText);
+            });
+
+            if (json.data && json.data.length)
+                chapters = [...chapters, ...json.data]
+            pageNr++;
+        }
+
+        return chapters
+    }
+
+    Model.prototype.scrapeContent = async function (page, chapterJson, cssHash, update = false) {
+        if (!page || !this.babelId) return null
+        chapterJson = { ...chapterJson, babelId: chapterJson.id }
+        delete chapterJson.id
+
+        const chapter = await sequelize.models.Chapter.findOrCreate({
+            where: { novel_id: this.id, babelId: chapterJson.babelId }
+        }).then(([chap, created]) => chap.update(chapterJson)
+        ).catch(err => console.log("Novel scrapeC", err.errors))
+
+        if (!(!chapter.chapterContent && chapterJson.hasContent &&
+            (chapterJson.isFree || chapterJson.isLimitFree))) {
+            return null
+        }
+
+        return await chapter.scrapeContent(page, this, cssHash);
+    };
 
     Model.associate = models => {
         Model.hasMany(models.Chapter, {

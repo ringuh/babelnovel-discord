@@ -1,6 +1,5 @@
-const urlTool = require('url')
 const { api, numerics } = global.config;
-const { TrackNovel, Chapter, Novel } = require('../../models')
+const { TrackNovel, Novel } = require('../../models')
 
 const fetchLatest = async (browser, client) => {
     console.log("fetching latest")
