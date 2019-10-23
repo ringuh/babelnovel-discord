@@ -38,17 +38,6 @@ const fetchCSS = async (page, url) => {
     } catch (err) { console.log(red(err.message)) }
 }
 
-
-const fetchChapterList = async (page, pageNr) => {
-    try {
-
-
-        urls.forEach(url => fetchPage(page, url))
-
-
-    } catch (err) { console.log(red(err.message)) }
-}
-
 const scrapeNovel = async (novel, livemsg) => {
     console.log(novel.name)
     const browser = await launchBrowser()
@@ -77,8 +66,6 @@ const scrapeNovel = async (novel, livemsg) => {
 
 
         }
-
-
         return true
     } catch (err) {
         console.log(red(err.message))
@@ -88,5 +75,5 @@ const scrapeNovel = async (novel, livemsg) => {
 
 }
 
-module.exports = { fetchChapterList, scrapeNovel }
+module.exports = { scrapeNovel }
 
