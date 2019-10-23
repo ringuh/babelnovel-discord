@@ -21,7 +21,12 @@ module.exports = {
 
         const novelStr = args.length ? args.join(' ').trim() : ""
         if (novelStr.length)
-            queryStr.where = { isFree: true, '$novel.genre$': { [Sequelize.Op.iLike]: `%${novelStr}%` } }
+            queryStr.where = {
+                isFree: {
+                    [Sequelize.Op.not]: false
+                },
+                '$novel.genre$': { [Sequelize.Op.iLike]: `%${novelStr}%` }
+            }
 
 
         Chapter.findAll(queryStr).then(chapters => {

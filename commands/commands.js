@@ -23,7 +23,6 @@ module.exports = {
                 let r = dirs(require('path').join(fPath, folder.name))
                 if(r.length)
                     replies = [...replies, "", folder.name, "-------", ...r]
-                console.log(r)
             })            
             return replies
         };
