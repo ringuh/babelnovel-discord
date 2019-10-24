@@ -40,9 +40,9 @@ const fetchCSS = async (page, url) => {
 
 const scrapeNovel = async (novel, livemsg) => {
     console.log(novel.name)
-    
+    let browser = null
     try {
-        const browser = await launchBrowser()
+        browser = await launchBrowser()
         const url = api.novel.replace("/api/", "/").replace("<book>", novel.babelId)
         console.log(url)
         const page = await browser.newPage();
@@ -68,8 +68,8 @@ const scrapeNovel = async (novel, livemsg) => {
         await browser.close()
         return true
     } catch (err) {
-        await browser.close()
         console.log(red(err.message))
+        if(browser) await browser.close()
         return false
     }
 

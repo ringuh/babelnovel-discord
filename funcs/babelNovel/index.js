@@ -1,7 +1,5 @@
 const { numerics } = global.config;
 const puppeteer = require('puppeteer');
-const fetchLatest = require('./fetchLatest')
-const fetchNovels = require('./fetchNovels')
 const trackNovels = require('./trackNovels')
 
 
@@ -10,19 +8,21 @@ const launchBrowser = () => {
 }
 
 const BabelNovel = async (client) => {
+    if (process.argv.includes("server"))
+        return console.log("SERVER CMD. skipping intervals")
 
-    browser = await launchBrowser()
-    if (process.argv.includes("init"))
-        return await fetchNovels(browser, client)
-    
-    if(process.argv.includes("server")) return console.log("SERVER CMD. skipping intervals")
-
-    return true
     // check tracked novels
     setInterval(async () => {
-        const browser = await launchBrowser()
-        await trackNovels(browser, client)
-        await browser.close()
+        let browser = null
+        try {
+            browser = await launchBrowser()
+            await trackNovels(browser, client)
+            await browser.close()
+        }
+        catch (err) {
+            console.log(err.message)
+            if (browser) await browser.close()
+        }
     }, numerics.track_novel_interval_minutes * 60000)
 
 };
