@@ -3,7 +3,7 @@ const { api } = global.config;
 const { Novel, TrackNovel } = require('../../models')
 const { red } = chalk.bold
 
-const fetchNovels = async (browser, client) => {
+const fetchNovels = async (browser) => {
     console.log("fetching novels")
     /* const novels = await Novel.findAll({})
     if (novels.length) return true */
@@ -26,7 +26,6 @@ const fetchNovels = async (browser, client) => {
                 return JSON.parse(document.querySelector("body").innerText);
             });
             pageNr++;
-            //json.code = 1
 
             for (var i in json.data) {
                 const novelData = json.data[i]
@@ -35,7 +34,7 @@ const fetchNovels = async (browser, client) => {
 
                 if (excludedNovels.includes(novelData.babelId))
                     continue
-                
+
                 novelData.genre = novelData.genres.map(genre => genre.name).filter(n => n).join(" | ")
 
                 const novel = await Novel.findOrCreate({

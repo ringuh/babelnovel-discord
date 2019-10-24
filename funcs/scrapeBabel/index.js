@@ -40,8 +40,9 @@ const fetchCSS = async (page, url) => {
 
 const scrapeNovel = async (novel, livemsg) => {
     console.log(novel.name)
-    const browser = await launchBrowser()
+    
     try {
+        const browser = await launchBrowser()
         const url = api.novel.replace("/api/", "/").replace("<book>", novel.babelId)
         console.log(url)
         const page = await browser.newPage();
@@ -63,11 +64,11 @@ const scrapeNovel = async (novel, livemsg) => {
         for (var i in chapterList) {
             if (await novel.scrapeContent(page, chapterList[i], cssHash))
                 await livemsg.progress(parseInt(i) + 1)
-
-
         }
+        await browser.close()
         return true
     } catch (err) {
+        await browser.close()
         console.log(red(err.message))
         return false
     }

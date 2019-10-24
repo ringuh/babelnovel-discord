@@ -1,13 +1,13 @@
 const { api, numerics } = global.config;
 const { TrackNovel, Novel } = require('../../models')
 
-const fetchLatest = async (browser, client) => {
+const fetchLatest = async (browser) => {
     console.log("fetching latest")
 
     const excludedNovels = await TrackNovel.findAll({
         include: ['novel']
     }).map(n => n.novel.babelId)
-
+    
     try {
         const page = await browser.newPage();
         await page.goto("https://babelnovel.com");
@@ -24,7 +24,7 @@ const fetchLatest = async (browser, client) => {
 
         const arr = json.data.reverse()
         for (var i in arr) {
-            const chapterData = arr[i];
+            const chapterData = arr[i]; 
             if (excludedNovels.includes(chapterData.bookId))
                 continue
             
