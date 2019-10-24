@@ -22,6 +22,9 @@ const BabelNovel = async (client) => {
     if (process.argv.includes("init"))
         return await fetchNovels(browser, client)
     
+    if(process.argv.includes("server")) return console.log("SERVER CMD. skipping intervals")
+
+    return true
     // check tracked novels
     setInterval(async () => {
         browser = await launchBrowser(browser)

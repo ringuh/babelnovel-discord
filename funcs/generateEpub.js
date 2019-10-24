@@ -1,5 +1,8 @@
 const fs = require('fs')
 const Epub = require("epub-gen-funstory");
+const Axios = require('axios')
+const pathTool = require('path')
+
 
 
 const generateEpub = async (novel, chapters) => {
@@ -8,15 +11,15 @@ const generateEpub = async (novel, chapters) => {
 
     let path = `./static/epub`
     if (!fs.existsSync(path)) fs.mkdirSync(path)
-
     path = `${path}/${fn}.epub`
 
-    //if (fs.existsSync(path)) return path
+    if (fs.existsSync(path)) return path
+    let cover = novel.cover ? encodeURI(novel.cover): null // || await DownloadCover(novel);
 
     const option = {
-        title: `${novel.name} ${chapters[0].index}-${chapters[chapters.length - 1].index}`, // *Required, title of the book.
+        title: `${novel.name} ${chapters[0].index}-${chapters[chapters.length - 1].index}`,
         author: author,
-        cover: novel.cover,
+        cover: cover,
         content: chapters.filter(c => c.index > 0).map(c => {
             let stripped = c.chapterContent.replace("</p>", "\n").replace("<p>", "")
             let words = stripped.split(/\s+/gi).length
@@ -29,7 +32,7 @@ const generateEpub = async (novel, chapters) => {
     };
 
     return await new Promise(resolve => {
-        console.log("in promise")
+        
         new Epub(option, path)
             .promise.then(
                 () => {
@@ -44,5 +47,32 @@ const generateEpub = async (novel, chapters) => {
     })
 
 };
+
+
+const DownloadCover = async (novel) => {
+    if (!novel.cover) return null
+    let path = `./static/cover`
+    if (!fs.existsSync(path)) fs.mkdirSync(path)
+
+    path = `${path}/${novel.canonicalName}${pathTool.extname(novel.cover)}`
+    const writer = fs.createWriteStream(path)
+    console.log(path)
+
+
+    const response = await Axios({
+        url: encodeURI(novel.cover),
+        method: 'GET',
+        responseType: 'stream'
+    }).catch(e => console.log(e))
+
+    response.data.pipe(writer)
+
+    return new Promise((resolve, reject) => {
+        writer.on('finish', () => resolve(path))
+        writer.on('error', (err) => reject(null))
+    });
+}
+
+
 
 module.exports = generateEpub
