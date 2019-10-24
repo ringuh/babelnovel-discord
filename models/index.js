@@ -5,11 +5,19 @@ const Sequelize = require('sequelize');
 const config = require('../config.json');
 let db = {};
 
-const sequelize = new Sequelize(
-    global.config.db.database,
-    global.config.db.user,
-    global.config.db.pass,
-    global.config.db.options);
+
+
+const sequelize = process.argv.includes("server") ?
+    new Sequelize(
+        global.config.server_db.database,
+        global.config.server_db.user,
+        global.config.server_db.pass,
+        global.config.server_db.options) :
+    new Sequelize(
+        global.config.db.database,
+        global.config.db.user,
+        global.config.db.pass,
+        global.config.db.options);
 
 sequelize
     .authenticate()

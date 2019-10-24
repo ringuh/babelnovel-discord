@@ -6,11 +6,8 @@ const { Novel, Chapter, Sequelize } = require("../../models")
 const { scrapeNovel } = require("../../funcs/scrapeBabel")
 const { RichEmbed } = require('discord.js')
 
-
-
-
 module.exports = {
-    name: ['babelepub'],
+    name: ['babelepub', 'be'],
     description: 'Scrapes available chapters and converts them to epub (private)',
     args: "<novel>",
     hidden: true,
@@ -44,7 +41,7 @@ module.exports = {
         let r = false
 
         let counter = 1
-        const max_counter = 5
+        const max_counter = 3
         const livemsg = new LiveMessage(message, novel)
         await livemsg.init()
         try {
@@ -74,7 +71,7 @@ module.exports = {
 
             await livemsg.description("Generating epub")
             let epub = await generateEpub(novel, chapters)
-            console.log("response to", epub)
+
             return await livemsg.attach(epub)
         } catch (err) {
             return await livemsg.description(err.message)

@@ -156,6 +156,6 @@ const SimulateHtml = (content, css) => {
     </html>
     `
 
-    fs.writeFile('./funcs/scrapeBabel/simulate.html', html, function (err) { })
+    //fs.writeFile('./funcs/scrapeBabel/simulate.html', html, function (err) { })
     return html
 }

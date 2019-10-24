@@ -127,7 +127,6 @@ module.exports = function (sequelize, type) {
             }
             return chap
         })
-
         return chapter
     }
 
