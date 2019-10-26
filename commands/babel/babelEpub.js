@@ -153,7 +153,6 @@ class LiveMessage {
             const emb = new RichEmbed()
                 .setTitle(this.novel.name)
                 .setThumbnail(this.novel.cover)
-                .setTimestamp()
             return emb
         }
 
