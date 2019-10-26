@@ -1,7 +1,5 @@
 global.config = require('./config.json');
-const { BabelNovel, launchBrowser } = require('./funcs/babelNovel')
-const { botPermission } = require('./funcs/commandTools')
-const puppeteer = require('puppeteer');
+const { launchBrowser } = require('./funcs/babelNovel')
 const fetchLatest = require('./funcs/babelNovel/fetchLatest')
 const fetchNovels = require('./funcs/babelNovel/fetchNovels')
 

@@ -14,7 +14,7 @@ const generateEpub = async (novel, chapters) => {
     path = `${path}/${fn}.epub`
 
     if (fs.existsSync(path)) return path
-    let cover = novel.cover ? encodeURI(novel.cover): null // || await DownloadCover(novel);
+    let cover = novel.cover ? encodeURI(novel.cover) : null // || await DownloadCover(novel);
 
     const option = {
         title: `${novel.name} ${chapters[0].index}-${chapters[chapters.length - 1].index}`,
@@ -32,12 +32,26 @@ const generateEpub = async (novel, chapters) => {
     };
 
     return await new Promise(resolve => {
-        
+
         new Epub(option, path)
             .promise.then(
-                () => {
-                    console.log("success")
-                    resolve(path)
+                async () => {
+                    const stats = fs.statSync(path)
+                    const fileSizeInMegabytes = stats["size"] / 1000000.0
+
+                    if (fileSizeInMegabytes > 8) {
+                        fs.renameSync(path, path.replace(".epub", "_full.epub"))
+                        const splitTo = Math.ceil(fileSizeInMegabytes / 8)
+                        const chapterCount = Math.floor(chapters.length / splitTo)
+                        let paths = []
+                        for (var i = 0; i < splitTo; ++i) {
+                            const chaps = chapters.slice(i * chapterCount, (i + 1) * chapterCount)
+                            const p = await generateEpub(novel, chaps)
+                            paths.push(p)
+                        }
+                        resolve(paths)
+                    }
+                    else resolve(path)
                 },
                 err => {
                     console.log("success")

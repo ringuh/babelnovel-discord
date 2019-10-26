@@ -71,7 +71,7 @@ module.exports = {
 
             await livemsg.description("Generating epub")
             let epub = await generateEpub(novel, chapters)
-
+            console.log("inepub", epub)
             return await livemsg.attach(epub)
         } catch (err) {
             return await livemsg.description(err.message)
@@ -80,7 +80,7 @@ module.exports = {
 
 
 
-    
+
 
 };
 
@@ -95,7 +95,7 @@ class LiveMessage {
     }
 
     async init(counter = 1, max = 1) {
-       
+
         this.emb.setColor('#0099ff')
             .setTitle(this.novel.name)
             .setURL(this.novel.Url())
@@ -143,18 +143,39 @@ class LiveMessage {
         //    .addBlankField()
     }
 
-    async attach(file) {
+    async attach(files) {
         if (this.sent) {
             await this.sent.delete()
             this.sent = null
         }
 
-        this.emb = new RichEmbed()
-            .setTitle(this.novel.name)
-            .setThumbnail(this.novel.cover)
-            .setDescription("Epub generated")
-            .attachFile(file)
-        return await this.send()
+        const Emb = () => {
+            const emb = new RichEmbed()
+                .setTitle(this.novel.name)
+                .setThumbnail(this.novel.cover)
+                .setTimestamp()
+            return emb
+        }
+
+
+        if (!files || !files.length) {
+            let emb = Emb()
+            emb.setDescription("something went wrong")
+            await this.message.channel.send(emb)
+        }
+
+        else {
+            if (typeof (files) === 'string')
+                files = [files]
+
+            files.forEach(async file => {
+                let emb = Emb()
+                emb.setDescription("Epub generated")
+                    .attachFile(file)
+                await this.message.channel.send(emb)
+            })
+
+        }
     }
 }
 
