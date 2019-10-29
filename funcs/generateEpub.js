@@ -13,7 +13,7 @@ const generateEpub = async (novel, chapters) => {
     if (!fs.existsSync(path)) fs.mkdirSync(path)
     path = `${path}/${fn}.epub`
     
-    //if (fs.existsSync(path)) return path
+    if (fs.existsSync(path)) return path
     let cover = novel.cover ? encodeURI(novel.cover) : null // || await DownloadCover(novel);
 
     const option = {
