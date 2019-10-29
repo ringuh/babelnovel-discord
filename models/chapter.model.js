@@ -11,7 +11,11 @@ module.exports = function (sequelize, type) {
             type: type.TEXT
         },
         chapterContent: {
-            type: type.TEXT
+            type: type.TEXT,
+            trim: true,
+            validate: {
+                notEmpty: true
+            }
         },
         hasContent: {
             type: type.BOOLEAN,
@@ -82,7 +86,7 @@ module.exports = function (sequelize, type) {
         return ret
     };
 
-    Model.prototype.Url = function (novel=this.novel) {
+    Model.prototype.Url = function (novel = this.novel) {
         return `https://babelnovel.com/books/${novel.canonicalName}/chapters/${this.canonicalName}`
     }
 
@@ -101,28 +105,33 @@ module.exports = function (sequelize, type) {
         json = json.data
         delete json.id
         if (json.content) {
-            
+
             const html = SimulateHtml(json.content, cssHash)
             await page.setContent(html)
             //const element = await page.$("body");
             //const children = await page.evaluateHandle(e => e.children, element);
 
-            const children = await page.evaluate(() => {
+            let children = await page.evaluate(() => {
                 let ret = []
                 document.body.childNodes.forEach(n => {
-                    if(n.offsetWidth > 0)
+                    if (n.offsetWidth > 0)
                         ret.push(n.innerText)
                 })
                 //let el = document.querySelector("body").children.map(e => e.innerText)
                 return ret
             });
 
+            if (!children.length) {
+                children = json.content.split("\n").filter(c => c.trim().length)
+            }
+
+
             json.chapterContent = children.map(n => `<p>${n.trim()}</p>`).join("\n")
         }
 
         delete json.content
         await this.update(json)
-        
+
         return true
 
 

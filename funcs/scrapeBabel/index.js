@@ -60,7 +60,7 @@ const scrapeNovel = async (novel, livemsg) => {
             .replace("<book>", novel.canonicalName)
             .replace("<chapterName>", chapterList[0].canonicalName)
         const cssHash = await fetchCSS(page, chapterUrl)
-
+        console.log(cssHash)
         for (var i in chapterList) {
             if (await novel.scrapeContent(page, chapterList[i], cssHash))
                 await livemsg.progress(parseInt(i) + 1)
