@@ -1,4 +1,4 @@
-const { api } = global.config
+const { api, numerics } = global.config
 
 module.exports = function (sequelize, type) {
     const Model = sequelize.define('Chapter', {
@@ -94,8 +94,9 @@ module.exports = function (sequelize, type) {
         if (!page || !this.babelId) return null
         const url = api.chapter.replace("<book>", novel.canonicalName).replace("<chapterName>", this.canonicalName)
         console.log(url)
+        await page.waitFor(numerics.puppeteer_delay)
         await page.goto(url)
-        await page.waitFor(500)
+        
         //await page.screenshot({ path: "screenshot.tmp.png" })
         let json = await page.evaluate(() => {
             return JSON.parse(document.querySelector("body").innerText);

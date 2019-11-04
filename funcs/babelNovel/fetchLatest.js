@@ -12,6 +12,7 @@ const fetchLatest = async (browser) => {
         const page = await browser.newPage();
         await page.goto("https://babelnovel.com");
         const url = `${api.latest_chapters}?pageSize=${numerics.latest_chapter_count}`
+        await page.waitFor(numerics.puppeteer_delay)
         await page.goto(url);
         //await page.screenshot({ path: `babelshot.tmp.png` });
         console.log(url)

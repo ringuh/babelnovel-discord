@@ -46,18 +46,22 @@ client.on('message', message => {
         (message.author.bot && message.author.id !== "621467973122654238"))
         return;
     // mobile discord wants to offer ! command instead of !command
-    if(message.content.startsWith(`${global.config.prefix} `))
+    if (message.content.startsWith(`${global.config.prefix} `))
         message.content = message.content.replace(`${global.config.prefix} `, global.config.prefix)
+
+    let args = message.content.slice(global.config.prefix.length).split(/ +/);
+    let parameters = []
+    if(args.includes("|"))
+        parameters = args.splice(args.indexOf("|"), args.length).slice(1)
     
-        const args = message.content.slice(global.config.prefix.length).split(/ +/);
     const command = args.shift().toLowerCase();
 
     if (!client.commands.has(command)) return;
 
     try {
         let cmd = client.commands.get(command)
-        if(botPermission(message, cmd.permissions))
-            cmd.execute(message, args);
+        if (botPermission(message, cmd.permissions))
+            cmd.execute(message, args, parameters);
     } catch (error) {
         console.error(error.message);
         message.reply('there was an error trying to execute that command!');

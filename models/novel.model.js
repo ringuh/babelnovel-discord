@@ -134,6 +134,7 @@ module.exports = function (sequelize, type) {
         console.log(this.name)
         if (!page || !this.babelId) return null
         const fetch_url = api.novel.replace("<book>", this.babelId)
+        await page.waitFor(numerics.puppeteer_delay)
         await page.goto(fetch_url)
         let json = await page.evaluate(() => {
             return JSON.parse(document.querySelector("body").innerText);
@@ -143,7 +144,7 @@ module.exports = function (sequelize, type) {
             return null
 
         let tmp = { ...json.data, author: null, id: this.id }
-        
+
         if (json.data.author) {
             tmp.author = json.data.author.name || this.author
             tmp.authorEn = json.data.author.enName || this.authorEn
@@ -170,6 +171,7 @@ module.exports = function (sequelize, type) {
                 .replace("<pageNr>", pageNr)
                 .replace("<pageSize>", numerics.novel_chapters_count)
             console.log(url)
+            await page.waitFor(numerics.puppeteer_delay)
             await page.goto(url)
             //await page.screenshot({ path: "screenshot.tmp.png" })
             json = await page.evaluate(() => {
@@ -178,6 +180,10 @@ module.exports = function (sequelize, type) {
 
             if (json.data && json.data.length)
                 chapters = [...chapters, ...json.data]
+
+            if (json.data.length < numerics.novel_chapters_count)
+                break
+
             pageNr++;
         }
 
@@ -194,8 +200,9 @@ module.exports = function (sequelize, type) {
         }).then(([chap, created]) => chap.update(chapterJson)
         ).catch(err => console.log("Novel scrapeC", err.errors))
 
-        if (!(!chapter.chapterContent && chapterJson.hasContent &&
-            (chapterJson.isFree || chapterJson.isLimitFree))) {
+        if (!((!chapter.chapterContent || update)
+            && chapterJson.hasContent
+            && (chapterJson.isFree || chapterJson.isLimitFree))) {
             return null
         }
 

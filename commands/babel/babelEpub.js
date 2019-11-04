@@ -11,7 +11,7 @@ module.exports = {
     description: 'Scrapes available chapters and converts them to epub (private)',
     args: "<novel>",
     hidden: true,
-    async execute(message, args) {
+    async execute(message, args, parameters) {
         if (!isBypass(message)) return false
 
         if (args.length < 1) return usageMessage(message, this)
@@ -39,21 +39,21 @@ module.exports = {
 
         //novel.chapters.forEach(chap => chap.update({chapterContent: chap.chapterContent.replace(/<br\/>/gi, "\n")}))
         let r = false
-
+        const force = parameters.includes('force')
         let counter = 1
         const max_counter = 3
         const livemsg = new LiveMessage(message, novel)
         await livemsg.init()
         try {
-
-
-            if (novel.chapters.some(c => !c.hasContent) || novel.chapters.length < novel.releasedChapterCount) {
+            if (global.config.babelepub && (force || novel.chapters.some(c => !c.hasContent)
+                || novel.chapters.length < novel.releasedChapterCount)) {
                 while (!r && counter < max_counter) {
                     await livemsg.init(counter, max_counter)
-                    r = await scrapeNovel(novel, livemsg)
+                    r = await scrapeNovel(novel, livemsg, force)
                     counter++;
+                    if(r === 'css_error')
+                        return await livemsg.description("CSS file missing")
                 }
-
             }
 
             const chapters = await Chapter.findAll({
@@ -66,7 +66,10 @@ module.exports = {
                 order: [['index', 'asc']]
             })
             if (!chapters.length)
-                return await livemsg.description("No chapters with content found for this novel")
+                return await livemsg.description(
+                    global.config.babelepub ?
+                        "No chapters with content found for this novel" :
+                        "This novel hasn't been parsed by superuser")
 
 
             await livemsg.description("Generating epub")
