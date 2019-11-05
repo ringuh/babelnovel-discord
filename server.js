@@ -41,9 +41,15 @@ client.once('ready', () => {
 });
 
 client.on('message', message => {
+
     // ignore non-prefix and other bots excluding REPEAT BOT 621467973122654238
     if (!message.content.startsWith(global.config.prefix) ||
-        (message.author.bot && message.author.id !== "621467973122654238"))
+        (message.author.bot &&
+            (!global.config.bypass_bots.includes(message.author.id)
+                || message.author.id === client.user.id
+            )
+        )
+    )
         return;
     // mobile discord wants to offer ! command instead of !command
     if (message.content.startsWith(`${global.config.prefix} `))
@@ -51,9 +57,9 @@ client.on('message', message => {
 
     let args = message.content.slice(global.config.prefix.length).split(/ +/);
     let parameters = []
-    if(args.includes("|"))
+    if (args.includes("|"))
         parameters = args.splice(args.indexOf("|"), args.length).slice(1)
-    
+
     const command = args.shift().toLowerCase();
 
     if (!client.commands.has(command)) return;

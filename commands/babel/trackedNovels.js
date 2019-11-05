@@ -19,7 +19,7 @@ module.exports = {
         });
 
         let msg = [`Tracked novels (${novels.length}):`, '']
-        if(!novels.length) msg.push("not tracking any novels")
+        if (!novels.length) msg.push("not tracking any novels")
 
         for (var i in novels) {
             const n = novels[i]
@@ -27,8 +27,8 @@ module.exports = {
             const [channels, roles] = ['channels', 'roles'].map(k => {
                 return n[k] ? n[k].split(",").map(k_id => {
                     const r = message.guild[k].get(k_id)
-                    return r ? `@${r.name}` : null
-                }).filter(c =>c) : [k == 'roles' ? `no notifications` : '<#default>']
+                    return r ? `${k === 'roles' ? '@' : '#'}${r.name}` : null
+                }).filter(c => c) : [k === 'roles' ? `no notifications` : '<#default>']
             })
 
             const hdr = `${n.novel.name} -- ${channels.join(' / ')} (${roles.join(" / ")})`
