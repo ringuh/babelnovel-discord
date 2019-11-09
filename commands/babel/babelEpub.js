@@ -184,6 +184,8 @@ class LiveMessage {
         else {
             if (typeof (files) === 'string')
                 files = [files]
+            else
+                files = files.reduce((acc, val) => acc.concat(val), [])
 
             files.forEach(async file => {
                 let emb = Emb()
