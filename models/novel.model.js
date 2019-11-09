@@ -183,7 +183,7 @@ module.exports = function (sequelize, type) {
 
             if (json.data.length < numerics.novel_chapters_count)
                 break
-
+            
             pageNr++;
         }
 

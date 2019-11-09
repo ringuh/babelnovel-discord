@@ -59,7 +59,7 @@ module.exports = {
         zlib.gzip(buf, (err, zip) => {
             if(err) return console.log(err)
             
-            message.channel.send(`.fromjson`, {
+            message.channel.send(`!fromjson`, {
                 file: new Discord.Attachment(zip, fname)
             }).catch(err => {
                 message.channel.send(err.message, { code: true })

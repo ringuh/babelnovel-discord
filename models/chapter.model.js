@@ -95,14 +95,16 @@ module.exports = function (sequelize, type) {
         const url = api.chapter.replace("<book>", novel.canonicalName).replace("<chapterName>", this.canonicalName)
         console.log(url)
         await page.waitFor(numerics.puppeteer_delay)
-        await page.goto(url)
         
+        await page.goto(url)
+
         //await page.screenshot({ path: "screenshot.tmp.png" })
         let json = await page.evaluate(() => {
             return JSON.parse(document.querySelector("body").innerText);
         });
+        
+        if (json.code !== 0) throw { message: "Chapter code is wrong" }
 
-        if (json.code !== 0) return null
         json = json.data
         delete json.id
         if (json.content) {
