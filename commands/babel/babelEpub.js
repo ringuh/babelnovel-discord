@@ -47,7 +47,7 @@ module.exports = {
         const livemsg = new LiveMessage(message, novel)
         await livemsg.init()
         try {
-            if (global.config.babelepub && (dforce || check || novel.chapters.some(c => !c.hasContent)
+            if (global.config.babelepub && (force || check || novel.chapters.some(c => !c.hasContent)
                 || novel.chapters.length !== novel.releasedChapterCount)) {
                 while (!r && counter < max_counter) {
                     await livemsg.init(counter, max_counter)
