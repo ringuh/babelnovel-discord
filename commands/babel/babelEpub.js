@@ -21,6 +21,9 @@ module.exports = {
         if (!novelStr.length)
             return message.channel.send(`Novel name missing`, { code: true });
 
+        let params = handleParameters(parameters, novelStr)
+        novelStr = params.novelStr
+
         const novel = await Novel.findOne({
             where: Sequelize.or(
                 Sequelize.where(
@@ -37,40 +40,39 @@ module.exports = {
         if (!novel)
             return message.channel.send(`Novel by name or alias '${novelStr}' not found`, { code: true });
 
+
+
         //novel.chapters.forEach(chap => chap.update({chapterContent: chap.chapterContent.replace(/<br\/>/gi, "\n")}))
         let r = false
 
-        const force = parameters.includes('force')
-        const check = parameters.includes('check')
-        let counter = 1
-        const max_counter = 2
+        let [counter, max_counter] = [1, 2]
         const livemsg = new LiveMessage(message, novel)
         await livemsg.init()
         try {
-            if (global.config.babelepub && (force || check || novel.chapters.some(c => !c.hasContent)
-                || novel.chapters.length !== novel.releasedChapterCount)) {
-                while (!r && counter < max_counter) {
+            if (global.config.babelepub &&
+                (params.force || params.check || novel.chapters.some(c => !c.hasContent)
+                    || novel.chapters.length !== novel.releasedChapterCount)) {
+                while (!r && counter <= max_counter) {
                     await livemsg.init(counter, max_counter)
-                    r = await scrapeNovel(novel, livemsg, force)
-
+                    r = await scrapeNovel(novel, livemsg, params)
                     counter++;
                     if (r === 'css_error')
                         return await livemsg.description("CSS file missing")
 
-                    if (!r && counter < max_counter) {
+                    if (!r && counter <= max_counter) {
                         const fail_timer = 20
                         await livemsg.description(`Trying again in ${fail_timer} seconds`)
                         await new Promise(resolve => setTimeout(resolve, fail_timer * 1000))
                     }
                 }
             }
-            else console.log(novel.chapters.length,
-                novel.releasedChapterCount,
-                novel.chapters.some(c => !c.hasContent))
 
             const chapters = await Chapter.findAll({
                 where: {
                     novel_id: novel.id,
+                    index: {
+                        [Sequelize.Op.between]: [params.min, params.max]
+                    },
                     chapterContent: {
                         [Sequelize.Op.not]: null
                     }
@@ -171,6 +173,7 @@ class LiveMessage {
             return emb
         }
 
+        await this.message.delete().catch(err => console.log("Deleting command", err.message))
 
         if (!files || !files.length) {
             let emb = Emb()
@@ -191,6 +194,33 @@ class LiveMessage {
 
         }
     }
+}
+
+const handleParameters = (parameters, novelStr) => {
+    let params = {
+        min: 0,
+        max: 10000,
+        force: parameters.includes("force"),
+        check: parameters.includes('check'),
+        token: null,
+    }
+
+    let token = parameters.find(p => p.startsWith("token="))
+    if (token) params.token = token.slice(6)
+
+    const match = /((?<min>\d{1,})\s*-\s*(?<max>\d{1,}))|\s(?<start>(\d{1,}))\s*$/;
+    const range = novelStr.match(match)
+    if (range) {
+        novelStr = novelStr.slice(0, range.index).trim()
+        params.min = parseInt(range.groups.start) || parseInt(range.groups.min)
+        if (range.groups.max && parseInt(range.groups.max) >= params.min)
+            params.max = parseInt(range.groups.max)
+    }
+
+    params.novelStr = novelStr
+
+
+    return params
 }
 
 

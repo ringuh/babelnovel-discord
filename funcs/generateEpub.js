@@ -13,13 +13,13 @@ const generateEpub = async (novel, chapters) => {
     if (!fs.existsSync(path)) fs.mkdirSync(path)
     path = `${path}/${fn}.epub`
     
-    if (fs.existsSync(path)) return path
+    //if (fs.existsSync(path)) return path
     let cover = novel.cover ? encodeURI(novel.cover) : null // || await DownloadCover(novel);
-
+    //console.log(cover)
     const option = {
         title: `${novel.name} ${chapters[0].index}-${chapters[chapters.length - 1].index}`,
         author: author,
-        cover: cover,
+        //cover: cover,
         content: chapters.filter(c => c.index > 0).map(c => {
             let stripped = c.chapterContent.replace("</p>", "\n").replace("<p>", "")
             let words = stripped.split(/\s+/gi).length

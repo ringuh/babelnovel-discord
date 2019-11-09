@@ -183,14 +183,47 @@ module.exports = function (sequelize, type) {
 
             if (json.data.length < numerics.novel_chapters_count)
                 break
-            
+
             pageNr++;
         }
 
         return chapters
     }
 
-    Model.prototype.scrapeContent = async function (page, chapterJson, cssHash, update = false) {
+    Model.prototype.scrapeChaptersBulk = async function (page, { min, max }) {
+        if (!page || !this.babelId) return null
+
+
+        let url = api.chapter_groups
+            .replace(/<book>/gi, this.babelId)
+        console.log(url)
+        await page.waitFor(numerics.puppeteer_delay)
+        await page.goto(url)
+        //await page.screenshot({ path: "screenshot.tmp.png" })
+        json = await page.evaluate(() => {
+            return JSON.parse(document.querySelector("body").innerText);
+        });
+        
+        if (json.code !== 0) throw { message: "Chapterlist failed" }
+
+        min = min * 10000
+        max = max * 10000
+
+        let chapters = []
+        for (var i in json.data) {
+            let c = json.data[i]
+            if (c.firstChapter.num >= min && c.firstChapter.num <= max)
+                chapters.push(c.firstChapter)
+            if (c.firstChapter.id !== c.lastChapter.id &&
+                c.lastChapter.num >= min && c.lastChapter.num <= max)
+                chapters.push(c.lastChapter)
+        }
+
+        return chapters
+    }
+
+
+    Model.prototype.scrapeContent = async function (page, chapterJson, cssHash, { force }) {
         if (!page || !this.babelId) return null
         chapterJson = { ...chapterJson, babelId: chapterJson.id }
         delete chapterJson.id
@@ -200,13 +233,10 @@ module.exports = function (sequelize, type) {
         }).then(([chap, created]) => chap.update(chapterJson)
         ).catch(err => console.log("Novel scrapeC", err.errors))
 
-        if (!((!chapter.chapterContent || update)
-            && chapterJson.hasContent
-            && (chapterJson.isFree || chapterJson.isLimitFree))) {
-            return null
-        }
+        if (!chapter.chapterContent || force)
+            return await chapter.scrapeContent(page, this, cssHash);
 
-        return await chapter.scrapeContent(page, this, cssHash);
+        return null
     };
 
     Model.associate = models => {

@@ -47,7 +47,7 @@ const fetchCSS = async (page, url) => {
     } catch (err) { console.log(red(err.message)) }
 }
 
-const scrapeNovel = async (novel, livemsg, force) => {
+const scrapeNovel = async (novel, livemsg, params) => {
     console.log(novel.name)
     let browser = null
     try {
@@ -59,8 +59,8 @@ const scrapeNovel = async (novel, livemsg, force) => {
         //fetch cookie
         await page.goto(url)
         await livemsg.description("Listing chapters")
-        const chapterList = await novel.scrapeChapters(page)
-
+        const chapterList = await novel.scrapeChaptersBulk(page, params)
+        
         await livemsg.max(chapterList.length)
         if (!chapterList.length) return false
 
@@ -70,21 +70,25 @@ const scrapeNovel = async (novel, livemsg, force) => {
             .replace("<chapterName>", chapterList[0].canonicalName)
         const cssHash = await fetchCSS(page, chapterUrl)
         if (!cssHash) return "css_error"
-        await page.setRequestInterception(true);
-        // add header for the navigation requests
-        page.on('request', request => {
-            // Do nothing in case of non-navigation requests.
-            if (!request.isNavigationRequest()) {
-                request.continue();
-                return;
-            }
-            // Add a new header for navigation request.
-            const headers = request.headers();
-            headers['token'] = '421aaa7f470b224d6426a6fed2da1e64c5033ea7b60456ace038a9bf9ea82bed'
-            request.continue({ headers });
-        });
+
+        if (params.token) {
+            await page.setRequestInterception(true);
+            // add header for the navigation requests
+            page.on('request', request => {
+                // Do nothing in case of non-navigation requests.
+                if (!request.isNavigationRequest()) {
+                    request.continue();
+                    return;
+                }
+                // Add a new header for navigation request.
+                const headers = request.headers();
+                headers['token'] = params.token
+                request.continue({ headers });
+            });
+        }
+
         for (var i in chapterList) {
-            if (await novel.scrapeContent(page, chapterList[i], cssHash, force))
+            if (await novel.scrapeContent(page, chapterList[i], cssHash, params))
                 await livemsg.progress(parseInt(i) + 1)
         }
         await browser.close()

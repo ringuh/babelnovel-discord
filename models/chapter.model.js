@@ -95,19 +95,19 @@ module.exports = function (sequelize, type) {
         const url = api.chapter.replace("<book>", novel.canonicalName).replace("<chapterName>", this.canonicalName)
         console.log(url)
         await page.waitFor(numerics.puppeteer_delay)
-        
         await page.goto(url)
 
         //await page.screenshot({ path: "screenshot.tmp.png" })
         let json = await page.evaluate(() => {
             return JSON.parse(document.querySelector("body").innerText);
         });
-        
+
         if (json.code !== 0) throw { message: "Chapter code is wrong" }
 
         json = json.data
         delete json.id
-        if (json.content) {
+        if (json.content &&
+            (json.isBorrowed || json.isBought || json.isFree || json.isLimitFree)) {
 
             const html = SimulateHtml(json.content, cssHash)
             await page.setContent(html)
@@ -128,15 +128,15 @@ module.exports = function (sequelize, type) {
                 children = json.content.split("\n").filter(c => c.trim().length)
             }
 
-
             json.chapterContent = children.map(n => `<p>${n.trim()}</p>`).join("\n")
         }
 
         delete json.content
         await this.update(json)
+        if (json.chapterContent)
+            return true
 
-        return true
-
+        throw { message: "Chapter content is missing", code: -1 }
 
     };
 
