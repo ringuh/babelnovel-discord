@@ -52,8 +52,8 @@ module.exports = {
             if (global.config.babelepub &&
                 (params.force || params.check || novel.chapters.some(c => !c.hasContent)
                     || novel.chapters.length !== novel.releasedChapterCount)) {
+                await livemsg.init(counter, max_counter)
                 while (!r && counter <= max_counter) {
-                    await livemsg.init(counter, max_counter)
                     r = await scrapeNovel(novel, livemsg, params)
                     counter++;
                     if (r === 'css_error')
@@ -85,7 +85,7 @@ module.exports = {
                         "No chapters with content found for this novel" :
                         "This novel hasn't been parsed by superuser")
 
-            if(params.noepub) return await livemsg.description("Parse finished. Skipping epub")
+            if (params.noepub) return await livemsg.description("Parse finished. Skipping epub")
             await livemsg.description("Generating epub")
             let epub = await generateEpub(novel, chapters, params)
             console.log("inepub", epub)

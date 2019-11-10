@@ -62,7 +62,7 @@ module.exports = {
                 //toFile.push(`${i + 1}. [${header}](${url})`)
                 toFile.push(`<li><a href='${url}'>${header}</a></li>`)
                 if (i < numerics.latest_chapter_limit)
-                    announceEmbed.addField(header + `${novel.updatedAt}`, url)
+                    announceEmbed.addField(header, url)
             }
 
             if (!novels.length)
