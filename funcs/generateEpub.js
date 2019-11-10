@@ -5,7 +5,7 @@ const pathTool = require('path')
 
 
 
-const generateEpub = async (novel, chapters) => {
+const generateEpub = async (novel, chapters, params) => {
     let author = [novel.authorEn, novel.author].filter(n => n).join(" | ")
     let fn = `${novel.canonicalName}_${chapters[0].index}-${chapters[chapters.length - 1].index}`
 
@@ -13,7 +13,7 @@ const generateEpub = async (novel, chapters) => {
     if (!fs.existsSync(path)) fs.mkdirSync(path)
     path = `${path}/${fn}.epub`
     
-    if (fs.existsSync(path)) return path
+    if (fs.existsSync(path) && !params.epub) return path
     let cover = novel.cover ? encodeURI(novel.cover) : null // || await DownloadCover(novel);
     //console.log(cover)
     const option = {

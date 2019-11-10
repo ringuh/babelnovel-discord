@@ -85,9 +85,9 @@ module.exports = {
                         "No chapters with content found for this novel" :
                         "This novel hasn't been parsed by superuser")
 
-
+            if(params.noepub) return await livemsg.description("Parse finished. Skipping epub")
             await livemsg.description("Generating epub")
-            let epub = await generateEpub(novel, chapters)
+            let epub = await generateEpub(novel, chapters, params)
             console.log("inepub", epub)
             return await livemsg.attach(epub)
         } catch (err) {
@@ -204,6 +204,8 @@ const handleParameters = (parameters, novelStr) => {
         max: 10000,
         force: parameters.includes("force"),
         check: parameters.includes('check'),
+        epub: parameters.includes('epub') || parameters.includes("force"),
+        noepub: parameters.includes('noepub'),
         token: null,
     }
 
