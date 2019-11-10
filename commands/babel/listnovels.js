@@ -4,13 +4,13 @@ const { numerics } = global.config
 const fs = require('fs');
 
 module.exports = {
-    name: ['freenovels'],
-    description: 'Lists currently free novels',
-    args: "[genre]",
+    name: ['listnovels'],
+    description: 'Lists novels',
+    args: "[genre/all]",
     execute(message, args) {
         let weekAgo = new Date()
         weekAgo.setDate(weekAgo.getDate() - 7)
-        
+
         let queryStr = {
             where: {
                 isPay: {
@@ -33,23 +33,31 @@ module.exports = {
             //limit: 20
         }
 
-        const novelStr = args.length ? args.join(' ').trim() : ""
-        if (novelStr.length)
-            queryStr.where['$genre$'] = { [Sequelize.Op.iLike]: `%${novelStr}%` }
+        let novelStr = args.length ? args.join(' ').trim() : ""
+        if (novelStr.length) {
+            if (novelStr.toLowerCase() === "all")
+                delete queryStr.where
+            else {
+                queryStr.where['$genre$'] = { [Sequelize.Op.iLike]: `%${novelStr}%` }
+                novelStr = `free_${novelStr}`
+            }
+
+        }
+        else novelStr = "free"
 
 
 
         Novel.findAll(queryStr).then(novels => {
             let toFile = [
                 "<html><header>",
-                `<title>Currently free ${novelStr} novels (${novels.length})</title>`,
+                `<title>Babelnovel ${novelStr} novels (${novels.length})</title>`,
                 "<body>",
-                `<h3>Currently free ${novelStr} novels (${novels.length})<h3>`,
+                `<h3>Babelnovel ${novelStr} novels (${novels.length})<h3>`,
                 "<ol>",
             ];
             const announceEmbed = new RichEmbed()
                 .setColor('#0099ff')
-                .setDescription(`${numerics.latest_chapter_limit} ${novelStr} free novels with most chapters`)
+                .setDescription(`${numerics.latest_chapter_limit} ${novelStr} novels with most chapters`)
                 .addBlankField()
 
             for (var i = 0; i < novels.length; ++i) {
@@ -69,7 +77,7 @@ module.exports = {
                 announceEmbed.addField(`No free novels found`, `Category: ${novelStr}`)
             else if (novels.length > numerics.latest_chapter_limit) {
                 toFile.push("</ol>", "</body>", "</html>")
-                const fPath = `static/currentlyfree_babel${novelStr}_${novels.length}.html`
+                const fPath = `static/babelnovel_${novelStr}_${novels.length}.html`
                 fs.writeFileSync(fPath, toFile.join("\r\n"), err => console.log(err))
                 announceEmbed.attachFile(fPath)
             }
