@@ -131,7 +131,7 @@ module.exports = function (sequelize, type) {
     }
 
     Model.prototype.fetchJson = async function (page) {
-        console.log(this.name)
+        console.log(this.name, this.releasedChapterCount)
         if (!page || !this.babelId) return null
         const fetch_url = api.novel.replace("<book>", this.babelId)
         await page.waitFor(numerics.puppeteer_delay)
@@ -153,6 +153,11 @@ module.exports = function (sequelize, type) {
             tmp.source_name = json.data.source.name || this.source_name
             tmp.source_url = json.data.source.url || this.source_url
         }
+        if(json.data.promotion && json.data.promotion.cutoffSeconds > 10000)
+            tmp.isPay = false
+        
+        if(json.data.isShowStrategy)
+            console.log(json.data.bookStrategy)
 
         await this.update(tmp)
 

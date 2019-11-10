@@ -37,7 +37,7 @@ const fetchNovels = async (browser) => {
                     continue
 
                 novelData.genre = novelData.genres.map(genre => genre.name).filter(n => n).join(" | ")
-
+                
                 const novel = await Novel.findOrCreate({
                     where: {
                         babelId: novelData.babelId
@@ -45,11 +45,11 @@ const fetchNovels = async (browser) => {
                 }).then(async ([nov, created]) => {
                     await nov.jsonToChapter(novelData.lastChapter)
                     return await nov.update(novelData).then(async n => {
-                        if (created) await nov.fetchJson(page)
-                        return n
+                        if(created || novelData.releasedChapterCount > 120)
+                            return await nov.fetchJson(page)
                     })
 
-                })
+                }).catch(err => console.log(err))
             }
         }
         await page.close()
