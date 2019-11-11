@@ -4,8 +4,9 @@ const generateEpub = require('../../funcs/generateEpub')
 const { StripMentions } = require('../../funcs/mentions.js')
 const { Novel, Chapter, Sequelize } = require("../../models")
 const { scrapeNovel } = require("../../funcs/scrapeBabel")
-const { RichEmbed } = require('discord.js')
+const Discord = require('discord.js')
 const tojson = require('./tojson')
+const RichEmbed = Discord.RichEmbed
 
 module.exports = {
     name: ['babelepub', 'be'],
@@ -50,11 +51,9 @@ module.exports = {
         const livemsg = new LiveMessage(message, novel)
         await livemsg.init()
         try {
-            if (global.config.babelepub &&
-                (params.force || params.check || novel.chapters.some(c => !c.hasContent)
-                    || novel.chapters.length !== novel.releasedChapterCount)) {
-                await livemsg.init(counter, max_counter)
+            if (isBypass(message) && params.check) {
                 while (!r && counter <= max_counter) {
+                    await livemsg.init(counter, max_counter)
                     r = await scrapeNovel(novel, livemsg, params)
                     counter++;
                     if (r === 'css_error')
@@ -88,10 +87,16 @@ module.exports = {
             if (params.tojson) tojson.execute(message, [novelStr])
             if (params.noepub) return await livemsg.description("Parse finished. Skipping epub")
             await livemsg.description("Generating epub")
+            if (global.config.generatingEpub)
+                return await livemsg.description("Epub generator in progress. Try again later")
+
+            global.config.generatingEpub = true;
             let epub = await generateEpub(novel, chapters, params)
-            console.log("inepub", epub)
-            return await livemsg.attach(epub)
+            global.config.generatingEpub = false;
+
+            return await livemsg.attach(epub, chapters)
         } catch (err) {
+            global.config.generatingEpub = false;
             return await livemsg.description(err.message)
         }
     },
@@ -188,13 +193,23 @@ class LiveMessage {
             else
                 files = files.reduce((acc, val) => acc.concat(val), [])
 
-            files.forEach(async file => {
-                let emb = Emb()
-                emb.setDescription("Epub generated")
-                    .attachFile(file)
-                await this.message.channel.send(emb)
+            const match = /(?<start>\d*)-(?<stop>\d*)\.epub$/i
+            files.sort((a, b) => {
+                let matchA = parseInt(a.match(match).groups.start)
+                let matchB = parseInt(b.match(match).groups.start)
+                return a - b
             })
+            console.log("epubs", files)
 
+            for (var i in files) {
+                const file = files[i]
+                let filename = file.split("/")[file.length - 1]
+                await this.message.channel.send(filename, {
+                    file: new Discord.Attachment(file, filename)
+                }).catch(err => {
+                    this.message.channel.send(err.message, { code: true })
+                })
+            }
         }
     }
 }
@@ -204,7 +219,7 @@ const handleParameters = (parameters, novelStr) => {
         min: 0,
         max: 10000,
         force: parameters.includes("force"),
-        check: parameters.includes('check'),
+        check: parameters.includes('check') || parameters.includes("force"),
         epub: parameters.includes('epub') || parameters.includes("force"),
         noepub: parameters.includes('noepub') || parameters.includes('tojson'),
         tojson: parameters.includes('tojson'),
