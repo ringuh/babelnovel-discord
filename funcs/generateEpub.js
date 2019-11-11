@@ -41,7 +41,6 @@ const generateEpub = async (novel, chapters, params) => {
                 const fileSizeInMegabytes = stats["size"] / 1000000.0
 
                 if (fileSizeInMegabytes > 8) {
-                    console.log("this far", "splitting")
                     const fullEpub = path.replace(".epub", "_full.epub")
                     if (fs.existsSync(fullEpub)) fs.unlinkSync(fullEpub)
                     fs.renameSync(path, fullEpub)
@@ -51,7 +50,6 @@ const generateEpub = async (novel, chapters, params) => {
                     let paths = []
                     
                     for (var i = 0; i < splitTo; ++i) {
-                        //const chaps = chapters.slice(i * chapterCount, (i + 1) * chapterCount)
                         const chaps = chapters.splice(0, (i + 1 < splitTo) ? chapterCount : chapters.length)
                         const p = await generateEpub(novel, chaps, params)
                         paths.push(p)

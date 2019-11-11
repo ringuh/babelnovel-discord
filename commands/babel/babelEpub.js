@@ -90,7 +90,7 @@ module.exports = {
             if (global.config.generatingEpub)
                 return await livemsg.description("Epub generator in progress. Try again later")
 
-            global.config.generatingEpub = true;
+            //global.config.generatingEpub = true;
             let epub = await generateEpub(novel, chapters, params)
             global.config.generatingEpub = false;
 
