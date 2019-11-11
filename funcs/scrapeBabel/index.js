@@ -60,10 +60,11 @@ const scrapeNovel = async (novel, livemsg, params) => {
         await page.goto(url)
         await livemsg.description("Listing chapters")
         const chapterList = await novel.scrapeChaptersBulk(page, params)
-        
-        await livemsg.max(chapterList.length)
-        if (!chapterList.length) return false
 
+        
+        await livemsg.setMax(chapterList.length)
+        if (!chapterList.length) return false
+        
         const chapterUrl = api.chapter
             .replace("/api/", "/")
             .replace("<book>", novel.canonicalName)

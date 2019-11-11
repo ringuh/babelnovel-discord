@@ -140,7 +140,8 @@ class LiveMessage {
         return await this.send()
     }
 
-    async max(val) {
+    async setMax(val) {
+        console.log("in max", val)
         this.max = val
         this.emb.setDescription(`Found ${this.max} chapters`)
 
