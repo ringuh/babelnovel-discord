@@ -40,6 +40,7 @@ const generateEpub = async (novel, chapters, params) => {
                     const fileSizeInMegabytes = stats["size"] / 1000000.0
 
                     if (fileSizeInMegabytes > 8) {
+                        fs.unlinkSync(path.replace(".epub", "_full.epub"))
                         fs.renameSync(path, path.replace(".epub", "_full.epub"))
                         const splitTo = Math.ceil(fileSizeInMegabytes / 8)
                         const chapterCount = Math.floor(chapters.length / splitTo)

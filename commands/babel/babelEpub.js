@@ -5,6 +5,7 @@ const { StripMentions } = require('../../funcs/mentions.js')
 const { Novel, Chapter, Sequelize } = require("../../models")
 const { scrapeNovel } = require("../../funcs/scrapeBabel")
 const { RichEmbed } = require('discord.js')
+const tojson = require('./tojson')
 
 module.exports = {
     name: ['babelepub', 'be'],
@@ -84,7 +85,7 @@ module.exports = {
                     global.config.babelepub ?
                         "No chapters with content found for this novel" :
                         "This novel hasn't been parsed by superuser")
-
+            if (params.tojson) tojson.execute(message, [novelStr])
             if (params.noepub) return await livemsg.description("Parse finished. Skipping epub")
             await livemsg.description("Generating epub")
             let epub = await generateEpub(novel, chapters, params)
@@ -205,7 +206,8 @@ const handleParameters = (parameters, novelStr) => {
         force: parameters.includes("force"),
         check: parameters.includes('check'),
         epub: parameters.includes('epub') || parameters.includes("force"),
-        noepub: parameters.includes('noepub'),
+        noepub: parameters.includes('noepub') || parameters.includes('tojson'),
+        tojson: parameters.includes('tojson'),
         token: null,
     }
 
