@@ -4,17 +4,18 @@ const generateEpub = require('../../funcs/generateEpub')
 const { StripMentions } = require('../../funcs/mentions.js')
 const { Novel, Chapter, Sequelize } = require("../../models")
 const { scrapeNovel } = require("../../funcs/scrapeBabel")
+const { numerics } = global.config;
 const Discord = require('discord.js')
 const tojson = require('./tojson')
 const RichEmbed = Discord.RichEmbed
 
 module.exports = {
     name: ['babelepub', 'be'],
-    description: 'Scrapes available chapters and converts them to epub (private)',
+    description: 'Generates epubs from scraped novels',
     args: "<novel>",
-    hidden: true,
+    //hidden: true,
     async execute(message, args, parameters) {
-        if (!isBypass(message)) return false
+        //if (!isBypass(message)) return false
 
         if (args.length < 1) return usageMessage(message, this)
 
@@ -48,7 +49,7 @@ module.exports = {
         let r = false
 
         let [counter, max_counter] = [1, 2]
-        const livemsg = new LiveMessage(message, novel)
+        const livemsg = new LiveMessage(message, novel, params)
         await livemsg.init()
         try {
             if (isBypass(message) && params.check) {
@@ -110,11 +111,12 @@ module.exports = {
 
 
 class LiveMessage {
-    constructor(message, novel) {
+    constructor(message, novel, params) {
         this.message = message
         this.novel = novel
         this.emb = new RichEmbed()
         this.sent = null
+        this.params = params
     }
 
     async init(counter = 1, max = 1) {
@@ -141,7 +143,6 @@ class LiveMessage {
     }
 
     async setMax(val) {
-        console.log("in max", val)
         this.max = val
         this.emb.setDescription(`Found ${this.max} chapters`)
 
@@ -207,8 +208,12 @@ class LiveMessage {
                 let filename = file.split("/")[file.length - 1]
                 await this.message.channel.send(filename, {
                     file: new Discord.Attachment(file, filename)
+                }).then(msg => {
+                    if (!this.params.keep)
+                        msg.delete(numerics.epub_lifespan_seconds * 1000)
                 }).catch(err => {
                     this.message.channel.send(err.message, { code: true })
+                        .then(msg => msg.delete(numerics.epub_lifespan_seconds * 1000))
                 })
             }
         }
@@ -220,10 +225,11 @@ const handleParameters = (parameters, novelStr) => {
         min: 0,
         max: 10000,
         force: parameters.includes("force"),
-        check: parameters.includes('check') || parameters.includes("force"),
+        check: parameters.includes('check') || parameters.includes("force") || parameters.includes('tojson'),
         epub: parameters.includes('epub') || parameters.includes("force"),
         noepub: parameters.includes('noepub') || parameters.includes('tojson'),
         tojson: parameters.includes('tojson'),
+        keep: parameters.includes('keep'),
         token: null,
     }
 
