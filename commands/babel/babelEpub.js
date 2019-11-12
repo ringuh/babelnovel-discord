@@ -2,11 +2,12 @@
 const { isBypass, usageMessage } = require('../../funcs/commandTools')
 const generateEpub = require('../../funcs/generateEpub')
 const { StripMentions } = require('../../funcs/mentions.js')
-const { Novel, Chapter, Sequelize } = require("../../models")
+const { Novel, Chapter, Setting, Sequelize } = require("../../models")
 const { scrapeNovel } = require("../../funcs/scrapeBabel")
 const { numerics } = global.config;
 const Discord = require('discord.js')
 const tojson = require('./tojson')
+const setting_key = 'epub_channel'
 const RichEmbed = Discord.RichEmbed
 
 module.exports = {
@@ -15,7 +16,9 @@ module.exports = {
     args: "<novel>",
     //hidden: true,
     async execute(message, args, parameters) {
-        //if (!isBypass(message)) return false
+        const epub_channel = await Setting.findOne({ where: { key: setting_key, server: message.guild.id } })
+        if (!isAdmin(message, false) && !(epub_channel && epub_channel.value === message.channel.id))
+            return true
 
         if (args.length < 1) return usageMessage(message, this)
 

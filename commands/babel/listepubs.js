@@ -1,20 +1,27 @@
+const { isAdmin } = require('../../funcs/commandTools')
 const { RichEmbed } = require('discord.js')
-const { Novel, Chapter, Sequelize } = require("../../models");
+const { Novel, Chapter, Setting, Sequelize } = require("../../models");
 const { numerics } = global.config
 const fs = require('fs');
+const setting = require('../setting')
+const setting_key = 'epub_channel'
 
 module.exports = {
     name: ['listepubs', 'babelepubs', 'bepubs'],
     description: 'Lists novels that have chapters to epub',
     args: "[genre]",
-    execute(message, args) {
+    async execute(message, args) {
+        const epub_channel = await Setting.findOne({ where: { key: setting_key, server: message.guild.id } })
+        if (!isAdmin(message, false) && !(epub_channel && epub_channel.value === message.channel.id))
+            return true
+
         let queryStr = {
             where: {
                 isPay: {
                     [Sequelize.Op.not]: true
                 }
             },
-            order: [/* ["releasedChapterCount", "desc"], */ ["canonicalName", "asc"]],
+            order: [/* ["releasedChapterCount", "desc"], */["canonicalName", "asc"]],
             include: [{
                 model: Chapter, as: 'chapters',
                 where: {
@@ -33,12 +40,12 @@ module.exports = {
             queryStr.where['$genre$'] = { [Sequelize.Op.iLike]: `%${novelStr}%` }
         }
 
-        let descriptionStr = `Available epubs. More on the attachment.\n\n`+
-        `!babelepub <name> [start / start - stop]\n`+
-        `usage:\n`+
-        `!babelepub martial god asura\n`+
-        `!babelepub against-the-gods 1500\n`+
-        `!babelepub nine star hegemon body arts 100-200`
+        let descriptionStr = `Available epubs. More on the attachment.\n\n` +
+            `!babelepub <name> [start / start - stop]\n` +
+            `usage:\n` +
+            `!babelepub martial god asura\n` +
+            `!babelepub against-the-gods 1500\n` +
+            `!babelepub nine star hegemon body arts 100-200`
 
         Novel.findAll(queryStr).then(novels => {
             let toFile = [
