@@ -1,5 +1,5 @@
 
-const { isBypass, usageMessage } = require('../../funcs/commandTools')
+const { isAdmin, isBypass, usageMessage } = require('../../funcs/commandTools')
 const generateEpub = require('../../funcs/generateEpub')
 const { StripMentions } = require('../../funcs/mentions.js')
 const { Novel, Chapter, Setting, Sequelize } = require("../../models")
