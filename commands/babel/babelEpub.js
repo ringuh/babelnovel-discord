@@ -230,7 +230,10 @@ const handleParameters = (parameters, novelStr) => {
         min: 0,
         max: 10000,
         force: parameters.includes("force"),
-        check: parameters.includes('check') || parameters.includes("force") || parameters.includes('tojson'),
+        check: parameters.includes('check') || 
+            parameters.includes("noepub") || 
+            parameters.includes("force") || 
+            parameters.includes('tojson'),
         epub: parameters.includes('epub') || parameters.includes("force"),
         noepub: parameters.includes('noepub') || parameters.includes('tojson'),
         tojson: parameters.includes('tojson'),
