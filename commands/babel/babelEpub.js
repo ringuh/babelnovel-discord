@@ -87,12 +87,12 @@ module.exports = {
                 return await livemsg.description(
                     global.config.babelepub ?
                         "No chapters with content found for this novel" :
-                        "This novel hasn't been parsed by superuser")
+                        "This novel hasn't been parsed by superuser", true)
             if (params.tojson) tojson.execute(message, [novelStr])
-            if (params.noepub) return await livemsg.description("Parse finished. Skipping epub")
+            if (params.noepub) return await livemsg.description("Parse finished. Skipping epub", true)
             await livemsg.description("Generating epub")
             if (global.config.generatingEpub)
-                return await livemsg.description("Epub generator in progress. Try again later")
+                return await livemsg.description("Epub generator in progress. Try again later", true)
 
             //global.config.generatingEpub = true;
             let epub = await generateEpub(novel, chapters, params)
@@ -101,7 +101,7 @@ module.exports = {
             return await livemsg.attach(epub, chapters)
         } catch (err) {
             global.config.generatingEpub = false;
-            return await livemsg.description(err.message)
+            return await livemsg.description(err.message, true)
         }
     },
 
@@ -140,9 +140,9 @@ class LiveMessage {
         return await this.send()
     }
 
-    async description(str) {
+    async description(str, expire) {
         this.emb.setDescription(str)
-        return await this.send()
+        return await this.send(expire)
     }
 
     async setMax(val) {
@@ -159,13 +159,15 @@ class LiveMessage {
         return await this.send()
     }
 
-    async send() {
+    async send(expire) {
         if (this.sent)
             return await this.sent.edit(this.emb.setTimestamp())
+                .then(msg => expire ? msg.delete(numerics.epub_lifespan_seconds * 1000) : null)
         else
-            return await this.message.channel.send(this.emb.setTimestamp()).then(msg => {
-                this.sent = msg
-            })
+            return await this.message.channel.send(
+                this.emb.setTimestamp()).then(msg => {
+                    this.sent = msg
+                }).then(msg => expire ? msg.delete(numerics.epub_lifespan_seconds * 1000) : null)
 
         //.setDescription(`${numerics.latest_chapter_limit} latest chapters on https://babelnovel.com/latest-update`)
         //    .addBlankField()
