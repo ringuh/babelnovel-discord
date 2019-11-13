@@ -34,7 +34,13 @@ module.exports = {
                 required: true
             }]
         })
-        if (!novel) return message.channel.send(`Novel by name or alias '${novelStr}' not found`, { code: true });
+        if (!novel) return await message.channel.send(
+            `Novel by name or alias '${novelStr}' not found`, { code: true }
+        ).then(msg =>
+            msg.delete(numerics.epub_lifespan_seconds * 1000)
+                .then(() => this.message.delete())
+        )
+
         await message.channel.startTyping()
         const emb = new RichEmbed()
             .setColor('#0099ff')

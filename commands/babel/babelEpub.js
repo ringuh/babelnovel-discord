@@ -25,7 +25,12 @@ module.exports = {
         let [novelStr, userMentions, channelMentions, roleMentions] = StripMentions(message.guild, args)
 
         if (!novelStr.length)
-            return message.channel.send(`Novel name missing`, { code: true });
+            return await message.channel.send(
+                `Novel name missing`, { code: true }
+            ).then(msg =>
+                msg.delete(numerics.epub_lifespan_seconds * 1000)
+                    .then(() => this.message.delete())
+            )
 
         let params = handleParameters(parameters, novelStr)
         novelStr = params.novelStr
@@ -44,7 +49,12 @@ module.exports = {
             include: ['chapters']
         })
         if (!novel)
-            return message.channel.send(`Novel by name or alias '${novelStr}' not found`, { code: true });
+            return await message.channel.send(
+                `Novel by name or alias '${novelStr}' not found`, { code: true }
+            ).then(msg =>
+                msg.delete(numerics.epub_lifespan_seconds * 1000)
+                    .then(() => this.message.delete())
+            )
 
 
 
@@ -61,7 +71,7 @@ module.exports = {
                     r = await scrapeNovel(novel, livemsg, params)
                     counter++;
                     if (r === 'css_error')
-                        return await livemsg.description("CSS file missing")
+                        return await livemsg.description("CSS file missing", true)
 
                     if (!r && counter <= max_counter) {
                         const fail_timer = 20
@@ -167,7 +177,7 @@ class LiveMessage {
             return await this.message.channel.send(
                 this.emb.setTimestamp()).then(msg => {
                     this.sent = msg
-                }).then(msg => expire ? 
+                }).then(msg => expire ?
                     msg.delete(numerics.epub_lifespan_seconds * 1000).then(msg => this.message.delete()) : null)
 
         //.setDescription(`${numerics.latest_chapter_limit} latest chapters on https://babelnovel.com/latest-update`)
@@ -186,8 +196,8 @@ class LiveMessage {
                 .setThumbnail(this.novel.cover)
             return emb
         }
-
-        await this.message.delete().catch(err => console.log("Deleting command", err.message))
+        if (!this.params.keep)
+            await this.message.delete().catch(err => console.log("Deleting command", err.message))
 
         if (!files || !files.length) {
             let emb = Emb()
@@ -217,6 +227,7 @@ class LiveMessage {
                 }).then(msg => {
                     if (!this.params.keep)
                         msg.delete(numerics.epub_lifespan_seconds * 1000)
+                            .then(() => this.message.delete())
                 }).catch(err => {
                     this.message.channel.send(err.message, { code: true })
                         .then(msg => msg.delete(numerics.epub_lifespan_seconds * 1000))
@@ -231,9 +242,9 @@ const handleParameters = (parameters, novelStr) => {
         min: 0,
         max: 10000,
         force: parameters.includes("force"),
-        check: parameters.includes('check') || 
-            parameters.includes("noepub") || 
-            parameters.includes("force") || 
+        check: parameters.includes('check') ||
+            parameters.includes("noepub") ||
+            parameters.includes("force") ||
             parameters.includes('tojson'),
         epub: parameters.includes('epub') || parameters.includes("force"),
         noepub: parameters.includes('noepub') || parameters.includes('tojson'),
