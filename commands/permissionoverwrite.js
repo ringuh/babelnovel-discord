@@ -19,23 +19,13 @@ module.exports = {
 
         let channel = channelMentions[0]
         let role = roleMentions[0] || message.channel.guild.defaultRole
-
+       
         if (cmd === 'ratelimit')
             channel.setRateLimitPerUser(parseInt(args[0]))
         else if (cmd === 'role') {
-            if (!roleMentions.length) {
-                let q = args[0].replace(/^@/, "")
-                
-                roleMentions = [
-                    message.channel.guild.roles.find(
-                        role => role.name.toLowerCase() === q.toLowerCase())
-                ]
-                str = str.replace(args[0], "").trim()
-            }
-            if (!roleMentions.length) return true
-
+            if(!roleMentions.length) return false
             const permissions = str.split(",").map(c => c.trim().toUpperCase())
-            roleMentions[0].setPermissions(permissions)
+            roleMentions[0].setPermissions(permissions).catch(err => console.log(err.message))
         } else {
             const permissions = str.split(",").map(c => c.trim().toUpperCase())
             console.log(permissions)
@@ -46,7 +36,7 @@ module.exports = {
                         [cmd]: permissions,
                     },
                 ]
-            })
+            }).catch(err => console.log(err.message))
         }
     }
 }

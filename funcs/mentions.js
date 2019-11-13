@@ -46,6 +46,13 @@ const Mention = {
         let stripped = []
 
         args.forEach((word, index) => {
+            if (word.startsWith('@')) {
+                let tmp = guild.roles.find(
+                    role => role.name.toLowerCase() === args[0].replace(/^@/, "").toLowerCase()
+                )
+                if (tmp) word = `<@&${tmp.id}>`
+            }
+
             const arr = [
                 [users, guild.members, word.match(/^<@!?(\d+)>$/)],
                 [channels, guild.channels, word.match(/^<#?(\d+)>$/)],
