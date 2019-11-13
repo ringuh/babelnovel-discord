@@ -31,7 +31,7 @@ module.exports = {
                     }
                 },
                 attributes: ['index'],
-                required: true
+                required: false
             }]
         })
         if (!novel) return await message.channel.send(
