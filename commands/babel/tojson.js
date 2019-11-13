@@ -40,7 +40,7 @@ module.exports = {
         if (!novel)
             return message.channel.send(`Novel by name or alias '${novelStr}' not found`, { code: true });
 
-        await message.channel.startTyping()
+        await message.channel.startTyping(2)
         const chapters = novel.chapters.filter(chapter => chapter.chapterContent).map(chapter => {
             const c = chapter.dataValues
             delete c.id
@@ -68,10 +68,10 @@ module.exports = {
                 msg.delete(numerics.epub_lifespan_seconds * 1000)
                     .then(() => message.delete())
             ).then(async () =>
-                await message.channel.stopTyping()
+                await message.channel.stopTyping(true)
             ).catch(err =>
                 message.channel.send(err.message, { code: true })
-                    .then(msg => message.channel.stopTyping())
+                    .then(msg => message.channel.stopTyping(true))
             )
         })
     },

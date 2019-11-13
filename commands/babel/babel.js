@@ -41,7 +41,7 @@ module.exports = {
                 .then(() => this.message.delete())
         )
 
-        await message.channel.startTyping()
+        await message.channel.startTyping(2)
         const emb = new RichEmbed()
             .setColor('#0099ff')
             .setTitle(novel.name)
@@ -67,7 +67,7 @@ module.exports = {
                 .addField("Source", novel.source_url)
 
         await message.channel.send(emb).then(msg => {
-            message.channel.stopTyping()
+            message.channel.stopTyping(true)
             if (!params.includes("keep"))
                 msg.delete(numerics.epub_lifespan_seconds * 1000).then(() => message.delete())
         })

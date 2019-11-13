@@ -21,7 +21,7 @@ module.exports = {
             return r.hostname
         })
         if (!urls.length) message.channel.send(`No valid urls`, { code: true })
-        await message.channel.startTyping()
+        await message.channel.startTyping(2)
         urls.forEach(async url => {
             try {
                 const data = await downloadFile(url)
@@ -48,10 +48,10 @@ module.exports = {
                     msg.delete(numerics.epub_lifespan_seconds * 1000)
                         .then(() => message.delete())
                 ).then(async () =>
-                    await message.channel.stopTyping()
+                    await message.channel.stopTyping(true)
                 ).catch(err =>
                     message.channel.send(err.message, { code: true })
-                        .then(async msg => await message.channel.stopTyping())
+                        .then(async msg => await message.channel.stopTyping(true))
                 )
             }
             catch (err) {

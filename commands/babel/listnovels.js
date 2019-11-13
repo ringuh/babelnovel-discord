@@ -10,7 +10,7 @@ module.exports = {
     async execute(message, args, params) {
         let weekAgo = new Date()
         weekAgo.setDate(weekAgo.getDate() - 7)
-        await message.channel.startTyping()
+        await message.channel.startTyping(2)
         let queryStr = {
             where: {
                 isPay: {
@@ -74,12 +74,12 @@ module.exports = {
 
 
             message.channel.send(announceEmbed).then(msg => {
-                message.channel.stopTyping()
+                message.channel.stopTyping(true)
                 if (!params.includes("keep"))
                     msg.delete(numerics.epub_lifespan_seconds * 1000).then(() => message.delete())
             })
         }).catch(err => {
-            message.channel.stopTyping()
+            message.channel.stopTyping(true)
             message.delete()
             console.log(err.message)
             throw err

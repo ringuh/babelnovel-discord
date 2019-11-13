@@ -40,7 +40,7 @@ module.exports = {
         }
 
 
-        await message.channel.startTyping()
+        await message.channel.startTyping(2)
         Novel.findAll(queryStr).then(novels => {
 
             let descriptionStr = `Available epubs (${novels.length})\n\n` +
@@ -80,7 +80,7 @@ module.exports = {
                 file: new Attachment(fPath, fName)
             }
             ).then(msg => {
-                message.channel.stopTyping()
+                message.channel.stopTyping(true)
                 if (!params.includes("keep"))
                     msg.delete(numerics.epub_lifespan_seconds * 1000).then(() => message.delete())
             })
