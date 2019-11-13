@@ -1,6 +1,6 @@
 
 const { usageMessage } = require('../../funcs/commandTools')
-const { Novel, Sequelize } = require("../../models")
+const { Novel, Chapter, Sequelize } = require("../../models")
 const { RichEmbed } = require('discord.js')
 const { api } = global.config
 const puppeteer = require('puppeteer')
@@ -29,10 +29,20 @@ module.exports = {
                     Sequelize.fn('lower', Sequelize.col('canonicalName')),
                     Sequelize.fn('lower', novelStr)
                 )
-            )
+            ),
+            include: [{
+                model: Chapter, as: 'chapters',
+                where: {
+                    chapterContent: {
+                        [Sequelize.Op.not]: null
+                    }
+                },
+                attributes: ['index'],
+                required: true
+            }]
         })
         if (!novel) return message.channel.send(`Novel by name or alias '${novelStr}' not found`, { code: true });
-
+        message.channel.startTyping()
         const emb = new RichEmbed()
             .setColor('#0099ff')
             .setTitle(novel.name)
@@ -44,6 +54,7 @@ module.exports = {
             .addBlankField()
 
             .addField("Chapters", novel.releasedChapterCount, true)
+            .addField("Epub", novel.chapters.length, true)
             .addField("Rating", novel.ratingNum, true)
             .addField("Name", novel.alias, true)
         if (novel.author || novel.authorEn)
@@ -59,7 +70,7 @@ module.exports = {
 
 
 
-        message.channel.send(emb)
+        message.channel.send(emb).then(msg => message.channel.stopTyping())
 
 
         //await nov.fetchJson(page)

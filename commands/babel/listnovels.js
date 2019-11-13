@@ -7,10 +7,10 @@ module.exports = {
     name: ['listnovels'],
     description: 'Lists novels',
     args: "[genre/all]",
-    execute(message, args) {
+    async execute(message, args) {
         let weekAgo = new Date()
         weekAgo.setDate(weekAgo.getDate() - 7)
-
+        await message.channel.startTyping()
         let queryStr = {
             where: {
                 isPay: {
@@ -47,7 +47,7 @@ module.exports = {
 
 
 
-        Novel.findAll(queryStr).then(novels => {
+        await Novel.findAll(queryStr).then(novels => {
             let toFile = [
                 "<html><header>",
                 `<title>Babelnovel ${novelStr} novels (${novels.length})</title>`,
@@ -82,8 +82,10 @@ module.exports = {
                 announceEmbed.attachFile(fPath)
             }
 
-            message.channel.send(announceEmbed);
-        }).catch((err) => {
+
+            message.channel.send(announceEmbed).then(async msg => await message.channel.stopTyping())
+        }).catch(err => {
+            message.channel.stopTyping()
             console.log(err.message)
             throw err
         })
