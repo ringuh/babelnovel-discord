@@ -2,7 +2,7 @@
 const { usageMessage } = require('../../funcs/commandTools')
 const { Novel, Chapter, Sequelize } = require("../../models")
 const { RichEmbed } = require('discord.js')
-const { api } = global.config
+const { api, numerics } = global.config
 const puppeteer = require('puppeteer')
 const TimeAgo = require('javascript-time-ago');
 const locale = require('javascript-time-ago/locale/en');
@@ -15,7 +15,7 @@ module.exports = {
     name: ['babel'],
     description: 'Print novel info',
     args: "<novel>",
-    async execute(message, args) {
+    async execute(message, args, params) {
         if (args.length < 1) return usageMessage(message, this)
 
         const novelStr = args.join(" ")
@@ -42,7 +42,7 @@ module.exports = {
             }]
         })
         if (!novel) return message.channel.send(`Novel by name or alias '${novelStr}' not found`, { code: true });
-        message.channel.startTyping()
+        await message.channel.startTyping()
         const emb = new RichEmbed()
             .setColor('#0099ff')
             .setTitle(novel.name)
@@ -67,10 +67,11 @@ module.exports = {
             emb.addBlankField()
                 .addField("Source", novel.source_url)
 
-
-
-
-        message.channel.send(emb).then(msg => message.channel.stopTyping())
+        await message.channel.send(emb).then(msg => {
+            message.channel.stopTyping()
+            if (!params.includes("keep"))
+                msg.delete(numerics.epub_lifespan_seconds * 1000).then(() => message.delete())
+        })
 
 
         //await nov.fetchJson(page)

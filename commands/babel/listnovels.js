@@ -7,7 +7,7 @@ module.exports = {
     name: ['listnovels'],
     description: 'Lists novels',
     args: "[genre/all]",
-    async execute(message, args) {
+    async execute(message, args, params) {
         let weekAgo = new Date()
         weekAgo.setDate(weekAgo.getDate() - 7)
         await message.channel.startTyping()
@@ -21,16 +21,6 @@ module.exports = {
                 }
             },
             order: [["releasedChapterCount", "desc"], ["canonicalName", "asc"]],
-            /*   include: [{
-                  model: Chapter, as: 'chapters',
-                  where: {
-                      chapterContent: {
-                          [Sequelize.Op.not]: null
-                      }
-                  },
-                  attributes: ['index']
-              }], */
-            //limit: 20
         }
 
         let novelStr = args.length ? args.join(' ').trim() : ""
@@ -83,9 +73,14 @@ module.exports = {
             }
 
 
-            message.channel.send(announceEmbed).then(async msg => await message.channel.stopTyping())
+            message.channel.send(announceEmbed).then(msg => {
+                message.channel.stopTyping()
+                if (!params.includes("keep"))
+                    msg.delete(numerics.epub_lifespan_seconds * 1000).then(() => message.delete())
+            })
         }).catch(err => {
             message.channel.stopTyping()
+            message.delete()
             console.log(err.message)
             throw err
         })
