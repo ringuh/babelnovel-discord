@@ -90,7 +90,7 @@ module.exports = {
             if (!chapters.length)
                 return await livemsg.description(
                     global.config.babelepub ?
-                        "No chapters with content found for this novel" :
+                        "No chapters with content found for this novel\ncheck !listepubs" :
                         "This novel hasn't been parsed by superuser", true)
             if (params.tojson) tojson.execute(message, [novelStr])
             if (params.noepub) return await livemsg.description("Parse finished. Skipping epub", true)
