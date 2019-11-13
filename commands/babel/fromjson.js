@@ -47,11 +47,11 @@ module.exports = {
                 ).then(msg =>
                     msg.delete(numerics.epub_lifespan_seconds * 1000)
                         .then(() => message.delete())
-                ).then(() =>
-                    message.channel.stopTyping()
+                ).then(async () =>
+                    await message.channel.stopTyping()
                 ).catch(err =>
                     message.channel.send(err.message, { code: true })
-                        .then(msg => message.channel.stopTyping())
+                        .then(async msg => await message.channel.stopTyping())
                 )
             }
             catch (err) {
