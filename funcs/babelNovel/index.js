@@ -23,7 +23,7 @@ const BabelNovel = async (client) => {
             console.log(err.message)
             if (browser) await browser.close()
         }
-    }, numerics.track_novel_interval_minutes * 60000)
+    }, numerics.track_novel_interval_minutes)
 
 };
 

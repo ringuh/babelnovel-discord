@@ -2,7 +2,7 @@
 const { isAdmin, usageMessage } = require('../funcs/commandTools')
 
 module.exports = {
-    name: ['clearcomment', 'clearcomments'],
+    name: ['clear', 'clearcomments'],
     description: 'Clears comments (admin)',
     args: "[comment_id] [+-count]",
     permissions: ["MANAGE_MESSAGES"],
@@ -30,7 +30,7 @@ module.exports = {
         if (msg_id)
             tbc = await message.channel.fetchMessage(msg_id).then(async msg => {
                 if (!msg) return null
-                return await msg.delete().then(deleted => deleted).catch(err => null)
+                return await msg.delete().catch(err => null)
             }).catch(err => console.log(err.message))
 
         if (tbc && query.limit)

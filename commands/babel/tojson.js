@@ -66,12 +66,11 @@ module.exports = {
 
             message.channel.send(`!fromjson`, {
                 file: new Discord.Attachment(zip, fname)
-            }).then(msg =>
-                msg.delete(numerics.epub_lifespan_seconds * 1000)
-                    .then(() => message.delete()).catch(err => console.log(err.message))
-            ).catch(err =>
-                message.channel.send(err.message, { code: true })
-            )
+            }).then(msg => msg.Expire(message))
+                .catch(err =>
+                    message.channel.send(err.message, { code: true })
+                        .then(msg => msg.Expire(message))
+                )
         })
     },
 

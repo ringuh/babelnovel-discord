@@ -27,10 +27,7 @@ module.exports = {
         if (!novelStr.length)
             return await message.channel.send(
                 `Novel name missing`, { code: true }
-            ).then(msg =>
-                msg.delete(numerics.epub_lifespan_seconds * 1000)
-                    .then(() => this.message.delete())
-            )
+            ).then(msg => msg.Expire(message))
 
         let params = handleParameters(parameters, novelStr)
         novelStr = params.novelStr
@@ -51,10 +48,7 @@ module.exports = {
         if (!novel)
             return await message.channel.send(
                 `Novel by name or alias '${novelStr}' not found`, { code: true }
-            ).then(msg =>
-                msg.delete(numerics.epub_lifespan_seconds * 1000)
-                    .then(() => this.message.delete())
-            )
+            ).then(msg => msg.Expire(message))
 
 
 
@@ -172,21 +166,20 @@ class LiveMessage {
     async send(expire) {
         if (this.sent)
             return await this.sent.edit(this.emb.setTimestamp())
-                .then(msg => expire ? msg.delete(numerics.epub_lifespan_seconds * 1000) : null)
+                .then(msg => msg.Expire(this.message, !expire))
         else
             return await this.message.channel.send(
                 this.emb.setTimestamp()).then(msg => {
                     this.sent = msg
-                }).then(msg => expire ?
-                    msg.delete(numerics.epub_lifespan_seconds * 1000).then(msg => this.message.delete()) : null)
-
+                    this.sent.Expire(this.message, !expire)
+                })
         //.setDescription(`${numerics.latest_chapter_limit} latest chapters on https://babelnovel.com/latest-update`)
         //    .addBlankField()
     }
 
     async attach(files) {
         if (this.sent) {
-            await this.sent.delete()
+            this.sent.Expire(null, null, 1)
             this.sent = null
         }
 
@@ -196,13 +189,11 @@ class LiveMessage {
                 .setThumbnail(this.novel.cover)
             return emb
         }
-        if (!this.params.keep)
-            await this.message.delete().catch(err => console.log("Deleting command", err.message))
 
         if (!files || !files.length) {
             let emb = Emb()
             emb.setDescription("something went wrong")
-            await this.message.channel.send(emb)
+            await this.message.channel.send(emb).then(msg => msg.Expire(this.message))
         }
 
         else {
@@ -224,14 +215,11 @@ class LiveMessage {
                 let filename = file.split("/")[file.length - 1]
                 await this.message.channel.send(filename, {
                     file: new Discord.Attachment(file, filename)
-                }).then(msg => {
-                    if (!this.params.keep)
-                        msg.delete(numerics.epub_lifespan_seconds * 1000)
-                            .then(() => this.message.delete())
-                }).catch(err => {
-                    this.message.channel.send(err.message, { code: true })
-                        .then(msg => msg.delete(numerics.epub_lifespan_seconds * 1000))
-                })
+                }).then(msg => msg.Expire(this.message, this.params.keep))
+                    .catch(err => {
+                        this.message.channel.send(err.message, { code: true })
+                            .then(msg => msg.Expire(this.message))
+                    })
             }
         }
     }

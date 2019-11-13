@@ -36,10 +36,7 @@ module.exports = {
         })
         if (!novel) return await message.channel.send(
             `Novel by name or alias '${novelStr}' not found`, { code: true }
-        ).then(msg =>
-            msg.delete(numerics.epub_lifespan_seconds * 1000)
-                .then(() => this.message.delete())
-        )
+        ).then(msg => msg.Expire(message))
 
         await message.channel.startTyping()
         const emb = new RichEmbed()
@@ -66,11 +63,7 @@ module.exports = {
             emb.addBlankField()
                 .addField("Source", novel.source_url)
 
-        await message.channel.send(emb).then(msg => {
-            message.channel.stopTyping(true)
-            if (!params.includes("keep"))
-                msg.delete(numerics.epub_lifespan_seconds * 1000).then(() => message.delete())
-        })
+        await message.channel.send(emb).then(msg => msg.Expire(message, params.includes("keep")));
 
 
         //await nov.fetchJson(page)

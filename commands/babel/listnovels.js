@@ -72,15 +72,11 @@ module.exports = {
                 announceEmbed.attachFile(fPath)
             }
 
-
-            message.channel.send(announceEmbed).then(msg => {
-                message.channel.stopTyping(true)
-                if (!params.includes("keep"))
-                    msg.delete(numerics.epub_lifespan_seconds * 1000).then(() => message.delete())
-            })
+            message.channel.send(announceEmbed).then(msg =>
+                msg.Expire(message, params.includes("keep"))
+            )
         }).catch(err => {
-            message.channel.stopTyping(true)
-            message.delete()
+            message.Expire()
             console.log(err.message)
             throw err
         })

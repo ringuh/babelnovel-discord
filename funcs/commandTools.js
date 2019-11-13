@@ -6,10 +6,7 @@ const CommandTools = {
             if (reply)
                 message.channel.send(
                     `Admin access required`, { code: true }
-                ).then(msg =>
-                    msg.delete(numerics.epub_lifespan_seconds * 1000)
-                        .then(() => this.message.delete())
-                )
+                ).then(msg => msg.Expire(message))
             return false
         }
         return true
@@ -23,10 +20,7 @@ const CommandTools = {
         message.channel.send(
             `Usage: ${global.config.prefix}${command.name[0]} ${command.args ? command.args : ''}`,
             { code: true }
-        ).then(msg =>
-            msg.delete(numerics.epub_lifespan_seconds * 1000)
-                .then(() => this.message.delete())
-        )
+        ).then(msg => msg.Expire(message))
     },
 
     botPermission: (message, permissions, reply = true) => {
@@ -42,10 +36,7 @@ const CommandTools = {
                 if (reply)
                     message.channel.send(
                         `Bot is missing permission ${permission}`, { code: true }
-                    ).then(msg =>
-                        msg.delete(numerics.epub_lifespan_seconds * 1000)
-                            .then(() => this.message.delete())
-                    )
+                    ).then(msg => msg.Expire(message))
                 return true
             }
         })

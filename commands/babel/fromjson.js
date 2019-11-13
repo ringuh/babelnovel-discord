@@ -45,15 +45,11 @@ module.exports = {
                 await message.channel.send(
                     `${novel.name}: updated ${counter}/${data.chapters.length}`,
                     { code: true }
-                ).then(msg =>
-                    msg.delete(numerics.epub_lifespan_seconds * 1000)
-                        .then(() => message.delete()).catch(err => console.log(err.message))
-                ).catch(err =>
-                    message.channel.send(err.message, { code: true })
-                )
+                ).then(msg => msg.Expire(message))
             }
             catch (err) {
                 message.channel.send(`Error: ${err.message}`, { code: true })
+                    .then(msg => msg.Expire(message))
             }
         })
     },

@@ -79,12 +79,7 @@ module.exports = {
                 code: true,
                 file: new Attachment(fPath, fName)
             }
-            ).then(msg => {
-                message.channel.stopTyping(true)
-                if (!params.includes("keep"))
-                    msg.delete(numerics.epub_lifespan_seconds * 1000).then(() => message.delete())
-            })
-
+            ).then(msg => msg.Expire(message, params.includes("keep")))
         }).catch((err) => {
             message.channel.stopTyping(true)
             console.log(err.message)

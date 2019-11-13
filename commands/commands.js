@@ -27,7 +27,7 @@ module.exports = {
             return replies
         };
 
-        reply = [...reply, ...dirs(path.join(appRoot, "commands"))]
+        reply = [...reply, ...dirs(__dirname)]
         
         message.channel.send(reply.join("\n"), { code: true })
 
