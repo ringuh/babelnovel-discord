@@ -41,7 +41,7 @@ module.exports = {
                 .then(() => this.message.delete())
         )
 
-        await message.channel.startTyping(2)
+        await message.channel.startTyping()
         const emb = new RichEmbed()
             .setColor('#0099ff')
             .setTitle(novel.name)

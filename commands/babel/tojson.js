@@ -40,7 +40,8 @@ module.exports = {
         if (!novel)
             return message.channel.send(`Novel by name or alias '${novelStr}' not found`, { code: true });
 
-        await message.channel.startTyping(2)
+        await message.channel.startTyping()
+
         const chapters = novel.chapters.filter(chapter => chapter.chapterContent).map(chapter => {
             const c = chapter.dataValues
             delete c.id
@@ -59,19 +60,17 @@ module.exports = {
         }))
 
         zlib.gzip(buf, (err, zip) => {
+            message.channel.stopTyping(true)
             if (err) return console.log(err)
             fs.writeFileSync(zipPath, zip, err => console.log(err))
 
-            message.channel.send(`!fromjson`, {
+            message.channel.send(`fromjson`, {
                 file: new Discord.Attachment(zip, fname)
             }).then(msg =>
                 msg.delete(numerics.epub_lifespan_seconds * 1000)
                     .then(() => message.delete())
-            ).then(async () =>
-                await message.channel.stopTyping(true)
             ).catch(err =>
                 message.channel.send(err.message, { code: true })
-                    .then(msg => message.channel.stopTyping(true))
             )
         })
     },

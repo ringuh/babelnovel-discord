@@ -10,7 +10,7 @@ module.exports = {
     async execute(message, args, params) {
         let weekAgo = new Date()
         weekAgo.setDate(weekAgo.getDate() - 7)
-        await message.channel.startTyping(2)
+        await message.channel.startTyping()
         let queryStr = {
             where: {
                 isPay: {

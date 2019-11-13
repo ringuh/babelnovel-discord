@@ -40,7 +40,7 @@ module.exports = {
         }
 
 
-        await message.channel.startTyping(2)
+        await message.channel.startTyping()
         Novel.findAll(queryStr).then(novels => {
 
             let descriptionStr = `Available epubs (${novels.length})\n\n` +
@@ -86,7 +86,7 @@ module.exports = {
             })
 
         }).catch((err) => {
-            message.channel.stopTyping()
+            message.channel.stopTyping(true)
             console.log(err.message)
             throw err
         })
