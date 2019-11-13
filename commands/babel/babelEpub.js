@@ -167,7 +167,8 @@ class LiveMessage {
             return await this.message.channel.send(
                 this.emb.setTimestamp()).then(msg => {
                     this.sent = msg
-                }).then(msg => expire ? msg.delete(numerics.epub_lifespan_seconds * 1000) : null)
+                }).then(msg => expire ? 
+                    msg.delete(numerics.epub_lifespan_seconds * 1000).then(msg => this.message.delete()) : null)
 
         //.setDescription(`${numerics.latest_chapter_limit} latest chapters on https://babelnovel.com/latest-update`)
         //    .addBlankField()
