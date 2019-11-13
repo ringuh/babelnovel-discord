@@ -3,13 +3,6 @@ const { usageMessage } = require('../../funcs/commandTools')
 const { Novel, Chapter, Sequelize } = require("../../models")
 const { RichEmbed } = require('discord.js')
 const { api, numerics } = global.config
-const puppeteer = require('puppeteer')
-const TimeAgo = require('javascript-time-ago');
-const locale = require('javascript-time-ago/locale/en');
-
-TimeAgo.addLocale(locale)
-const timeAgo = new TimeAgo('en-US')
-
 
 module.exports = {
     name: ['babel'],

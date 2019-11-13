@@ -1,10 +1,7 @@
 
 const { isBypass, usageMessage } = require('../../funcs/commandTools')
-const generateEpub = require('../../funcs/generateEpub')
-const { StripMentions } = require('../../funcs/mentions.js')
 const { Novel, Chapter, Sequelize } = require("../../models")
-const { scrapeNovel } = require("../../funcs/scrapeBabel")
-const { RichEmbed } = require('discord.js')
+const { numerics } = global.config
 const axios = require('axios')
 const fs = require('fs')
 const zlib = require('zlib');
@@ -24,7 +21,7 @@ module.exports = {
             return r.hostname
         })
         if (!urls.length) message.channel.send(`No valid urls`, { code: true })
-
+        await message.channel.startTyping()
         urls.forEach(async url => {
             try {
                 const data = await downloadFile(url)
@@ -44,7 +41,18 @@ module.exports = {
                         return chap
                     })
                 }
-                message.channel.send(`${novel.name}: updated ${counter}/${data.chapters.length}`, { code: true })
+                message.channel.send(
+                    `${novel.name}: updated ${counter}/${data.chapters.length}`,
+                    { code: true }
+                ).then(msg =>
+                    msg.delete(numerics.epub_lifespan_seconds * 1000)
+                        .then(() => message.delete())
+                ).then(() =>
+                    message.channel.stopTyping()
+                ).catch(err =>
+                    message.channel.send(err.message, { code: true })
+                        .then(msg => message.channel.stopTyping())
+                )
             }
             catch (err) {
                 message.channel.send(`Error: ${err.message}`, { code: true })
