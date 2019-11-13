@@ -9,7 +9,7 @@ module.exports = {
     name: ['listepubs', 'babelepubs', 'bepubs'],
     description: 'Lists novels that have chapters to epub',
     args: "[genre]",
-    async execute(message, args) {
+    async execute(message, args, params) {
         const epub_channel = await Setting.findOne({ where: { key: setting_key, server: message.guild.id } })
         if (!isAdmin(message, false) && !(epub_channel && epub_channel.value === message.channel.id))
             return true
@@ -79,9 +79,10 @@ module.exports = {
                 code: true,
                 file: new Attachment(fPath, fName)
             }
-            ).then(msg =>
-                msg.delete(numerics.epub_lifespan_seconds * 1000).then(() => message.delete())
-            )
+            ).then(msg => {
+                if (!params.includes("keep"))
+                    msg.delete(numerics.epub_lifespan_seconds * 1000).then(() => message.delete())
+            })
 
         }).catch((err) => {
             console.log(err.message)
