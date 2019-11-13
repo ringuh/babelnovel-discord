@@ -64,11 +64,11 @@ module.exports = {
             if (err) return console.log(err)
             fs.writeFileSync(zipPath, zip, err => console.log(err))
 
-            message.channel.send(`fromjson`, {
+            message.channel.send(`!fromjson`, {
                 file: new Discord.Attachment(zip, fname)
             }).then(msg =>
                 msg.delete(numerics.epub_lifespan_seconds * 1000)
-                    .then(() => message.delete())
+                    .then(() => message.delete()).catch(err => console.log(err.message))
             ).catch(err =>
                 message.channel.send(err.message, { code: true })
             )

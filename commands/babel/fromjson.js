@@ -47,7 +47,7 @@ module.exports = {
                     { code: true }
                 ).then(msg =>
                     msg.delete(numerics.epub_lifespan_seconds * 1000)
-                        .then(() => message.delete())
+                        .then(() => message.delete()).catch(err => console.log(err.message))
                 ).catch(err =>
                     message.channel.send(err.message, { code: true })
                 )
