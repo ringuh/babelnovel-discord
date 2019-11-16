@@ -47,11 +47,12 @@ module.exports = {
             .setDescription(novel.synopsis.substr(0, 1000))
             .setFooter(novel.genre, novel.cover)
             .setTimestamp()
-            .addBlankField()
-
+            .addField("bookId", novel.babelId, true)
+            .addField("Rating", Math.round(novel.ratingNum * 100) / 100, true)
+            .addBlankField(true)
             .addField("Chapters", novel.releasedChapterCount, true)
             .addField("Epub", novel.chapters.length, true)
-            .addField("Rating", novel.ratingNum, true)
+            .addBlankField(true)
             .addField("Name", novel.alias, true)
         if (novel.author || novel.authorEn)
             emb.addField("Author",
