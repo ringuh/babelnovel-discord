@@ -15,12 +15,7 @@ module.exports = {
             return true
 
         let queryStr = {
-           where: {
-                isPay: {
-                    [Sequelize.Op.not]: true
-                }
-            }, 
-            order: [/* ["releasedChapterCount", "desc"], */["canonicalName", "asc"]],
+            order: [["canonicalName", "asc"]],
             include: [{
                 model: Chapter, as: 'chapters',
                 where: {
@@ -42,7 +37,7 @@ module.exports = {
 
         await message.channel.startTyping()
         Novel.findAll(queryStr).then(novels => {
-
+            novels = novels.filter(novel => novel.chapters.length > 100)
             let descriptionStr = `Available epubs (${novels.length})\n\n` +
                 `!babelepub <name> [start / start - stop]\n\n` +
                 `usage:\n` +
@@ -64,8 +59,6 @@ module.exports = {
                 const header = `${novel.name} - ${novel.chapters.length}`
                 const url = novel.Url()
                 toFile.push(`<li><a href='${url}'>${header}</a> - !babelepub ${novel.canonicalName}</li>`)
-                /* if (i < numerics.latest_chapter_limit)
-                    announceEmbed.addField(header, url) */
             }
 
             toFile.push("</ol>", "</body>", "</html>")
