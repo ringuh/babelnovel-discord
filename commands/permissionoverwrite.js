@@ -18,7 +18,7 @@ module.exports = {
         let [str, userMentions, channelMentions, roleMentions] = StripMentions(message.guild, args)
 
         let channel = channelMentions[0]
-        let role = roleMentions[0] || message.channel.guild.defaultRole
+        let role = roleMentions[0]
        
         if (cmd === 'ratelimit')
             channel.setRateLimitPerUser(parseInt(args[0]))
