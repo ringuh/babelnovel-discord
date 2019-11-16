@@ -6,7 +6,7 @@ const fs = require('fs');
 const setting_key = 'epub_channel'
 
 module.exports = {
-    name: ['listepubs', 'babelepubs', 'bepubs'],
+    name: ['listepubs', 'listepub'],
     description: 'Lists novels that have chapters to epub',
     args: "[genre]",
     async execute(message, args, params) {
