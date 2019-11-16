@@ -15,11 +15,11 @@ module.exports = {
             return true
 
         let queryStr = {
-           /*  where: {
+           where: {
                 isPay: {
                     [Sequelize.Op.not]: true
                 }
-            }, */
+            }, 
             order: [/* ["releasedChapterCount", "desc"], */["canonicalName", "asc"]],
             include: [{
                 model: Chapter, as: 'chapters',
