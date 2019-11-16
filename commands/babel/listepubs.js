@@ -1,7 +1,7 @@
 const { isAdmin } = require('../../funcs/commandTools')
 const { Attachment } = require('discord.js')
 const { Novel, Chapter, Setting, Sequelize } = require("../../models");
-const { numerics } = global.config
+const { numerics, api } = global.config
 const fs = require('fs');
 const setting_key = 'epub_channel'
 
@@ -15,29 +15,27 @@ module.exports = {
             return true
 
         let queryStr = {
-            order: [["canonicalName", "asc"]],
-            include: [{
-                model: Chapter, as: 'chapters',
-                where: {
-                    chapterContent: {
-                        [Sequelize.Op.not]: null
-                    }
-                },
-                attributes: ['index'],
-                required: true
-            }]
-            //limit: 20
+            where: {
+                chapterContent: {
+                    [Sequelize.Op.not]: null
+                }
+            },
+            group: ['novel.id'],
+            attributes: [[Sequelize.fn('COUNT', 'id'), 'chapterCount']],
+            include: [{ model: Novel, as: 'novel', attributes: ['name', 'canonicalName'] }]
         }
-
-        let novelStr = args.length ? args.join(' ').trim() : ""
-        if (novelStr.length) {
-            queryStr.where['$genre$'] = { [Sequelize.Op.iLike]: `%${novelStr}%` }
-        }
-
-
         await message.channel.startTyping()
-        Novel.findAll(queryStr).then(novels => {
-            novels = novels.filter(novel => novel.chapters.length > 100)
+
+        Chapter.findAll(queryStr).then(chapters => {
+            let novels = chapters.map(chapter => {
+                return {
+                    count: parseInt(chapter.dataValues.chapterCount),
+                    name: chapter.novel.name,
+                    canonicalName: chapter.novel.canonicalName,
+                    url: api.novel_home.replace("<book>", chapter.novel.canonicalName)
+                }
+            }).filter(c => c.count > 100).sort((a, b) => b.count - a.count)
+
             let descriptionStr = `Available epubs (${novels.length})\n\n` +
                 `!babelepub <name> [start / start - stop]\n\n` +
                 `usage:\n` +
@@ -47,23 +45,20 @@ module.exports = {
 
             let toFile = [
                 "<html><header>",
-                `<title>Babelnovel ${novelStr} epubs (${novels.length})</title>`,
+                `<title>Babelnovel epubs (${novels.length})</title>`,
                 "<body>",
-                `<h3>Babelnovel ${novelStr} epubs (${novels.length})<h3>`,
+                `<h3>Babelnovel epubs (${novels.length})<h3>`,
                 "<ol>",
             ];
-
-            for (var i = 0; i < novels.length; ++i) {
-                const novel = novels[i];
-                novel.chapters = novel.chapters || []
-                const header = `${novel.name} - ${novel.chapters.length}`
-                const url = novel.Url()
-                toFile.push(`<li><a href='${url}'>${header}</a> - !babelepub ${novel.canonicalName}</li>`)
+            for (var i in novels) {
+                const novel = novels[i]
+                toFile.push(`<li><a href='${novel.url}'>${novel.name} - ${novel.count}</a>` +
+                    `- !babelepub ${novel.canonicalName}</li>`)
             }
 
             toFile.push("</ol>", "</body>", "</html>")
-            if (novelStr) novelStr = `${novelStr}_`
-            const fName = `babelnovel_${novelStr}${novels.length}.html`
+
+            const fName = `babelepub_${novels.length}.html`
             const fPath = `static/${fName}`
             fs.writeFileSync(fPath, toFile.join("\r\n"), err => console.log(err))
 
@@ -71,8 +66,7 @@ module.exports = {
                 descriptionStr, {
                 code: true,
                 file: new Attachment(fPath, fName)
-            }
-            ).then(msg => msg.Expire(message, params.includes("keep")))
+            }).then(msg => msg.Expire(message, params.includes("keep")))
         }).catch((err) => {
             message.channel.stopTyping(true)
             console.log(err.message)
