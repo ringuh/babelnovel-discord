@@ -1,4 +1,4 @@
-module.exports = function(sequelize, type) {
+module.exports = function (sequelize, type) {
     const Model = sequelize.define('Setting', {
         id: {
             type: type.INTEGER,
@@ -20,7 +20,10 @@ module.exports = function(sequelize, type) {
         type: { // channel, user, guild, role
             type: type.STRING,
             validate: {
-                isIn: [['discord_channel', 'discord_user', 'discord_guild', 'discord_role']]
+                isIn: [['discord_channel',
+                    'discord_user',
+                    'discord_guild',
+                    'discord_role']]
             }
         }
 
@@ -29,16 +32,18 @@ module.exports = function(sequelize, type) {
     });
 
     Model.prototype.typeToValue = function (server) {
+        if(!this.type) return this.value
+        
         const { IsUser, IsChannel } = require('../funcs/mentions')
-        const typeActions = { 
-            discord_channel: IsChannel, 
+        const typeActions = {
+            discord_channel: IsChannel,
             discord_user: IsUser,
             discord_guild: null,
             discord_role: null,
         }
-        
+
         return typeActions[this.type](this.value, server)
-	}
+    }
 
     return Model;
 }

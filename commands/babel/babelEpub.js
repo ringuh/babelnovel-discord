@@ -29,7 +29,7 @@ module.exports = {
                 `Novel name missing`, { code: true }
             ).then(msg => msg.Expire(message))
 
-        let params = handleParameters(parameters, novelStr)
+        let params = await handleParameters(parameters, novelStr, message)
         novelStr = params.novelStr
 
         const novel = await Novel.findOne({
@@ -225,7 +225,7 @@ class LiveMessage {
     }
 }
 
-const handleParameters = (parameters, novelStr) => {
+const handleParameters = async (parameters, novelStr, message) => {
     let params = {
         min: 0,
         max: 10000,
@@ -242,7 +242,15 @@ const handleParameters = (parameters, novelStr) => {
     }
 
     let token = parameters.find(p => p.startsWith("token="))
-    if (token) params.token = token.slice(6)
+    if (!token && parameters.includes('token')) params.token = "rinku"
+    else if (token) params.token = token.slice(6)
+
+    if (params.token && params.token.length < 40) await Setting.findOne({
+        where: {
+            key: `babel_token_${params.token}`,
+            server: message.guild.id
+        }
+    }).then(setting => setting ? params.token = setting.value : null)
 
     const match = /((?<min>\d{1,})\s*-\s*(?<max>\d{1,}))|\s(?<start>(\d{1,}))\s*$/;
     const range = novelStr.match(match)

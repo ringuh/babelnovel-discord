@@ -28,8 +28,9 @@ module.exports = {
                 setting.destroy().then(() => message.channel.send(`Deleted ${key}`))
 
             else {
-                setting.update({ value: value.id})
-                message.channel.send(`Saved ${key} as ${value}`)
+                setting.update({ value: value.id || value }).then(set =>
+                    message.channel.send(`Saved ${set.key} as ${type ? value : set.value}`)
+                )
             }
 
         }).catch((err) => {
