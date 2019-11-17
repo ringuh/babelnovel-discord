@@ -38,7 +38,8 @@ module.exports = {
             `Novel by name or alias '${novelStr}' not found`, { code: true }
         ).then(msg => msg.Expire(message))
 
-        await message.channel.startTyping()
+        //await message.channel.startTyping()
+
         const emb = new RichEmbed()
             .setColor('#0099ff')
             .setTitle(novel.name)
@@ -66,6 +67,24 @@ module.exports = {
 
         await message.channel.send(emb).then(msg => msg.Expire(message, params.includes("keep")));
 
+        if (params.includes('script')) {
+            const codeStr = `!((id) => { \/\/ ${novel.name}\n` +
+                `const token = document.cookie.split(";").map(c => c.trim()).find(c => c.startsWith("_bc_novel_token=")).slice(16, document.cookie.length)\n` +
+                `const url = "/api/user/libraries"\n` +
+                `const xhttp = new XMLHttpRequest();\n` +
+
+                `xhttp.open("POST", url, true);\n` +
+                `xhttp.setRequestHeader("Content-type", "application/json");\n` +
+                `xhttp.setRequestHeader("token", token);\n` +
+
+                `var d = JSON.stringify({\n` +
+                `\tbookId: id\n` +
+                `})\n` +
+                `xhttp.send(d);\n` +
+                `})('${novel.babelId}');\n`;
+
+            await message.channel.send(codeStr, { code: 'javascript' }).then(msg => msg.Expire(message, params.includes("keep")));
+        }
 
         //await nov.fetchJson(page)
     }
