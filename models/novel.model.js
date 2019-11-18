@@ -1,4 +1,5 @@
 const { api, numerics } = global.config
+const { red, green, yellow, magenta, blue } = require('chalk').bold
 const urlTool = require('url')
 
 module.exports = function (sequelize, type) {
@@ -134,7 +135,6 @@ module.exports = function (sequelize, type) {
         console.log(this.name, this.releasedChapterCount)
         if (!page || !this.babelId) return null
         const fetch_url = api.novel.replace("<book>", this.babelId)
-        await page.waitFor(numerics.puppeteer_delay)
         await page.goto(fetch_url)
         let json = await page.evaluate(() => {
             return JSON.parse(document.querySelector("body").innerText);
@@ -153,10 +153,10 @@ module.exports = function (sequelize, type) {
             tmp.source_name = json.data.source.name || this.source_name
             tmp.source_url = json.data.source.url || this.source_url
         }
-        if(json.data.promotion && json.data.promotion.cutoffSeconds > 10000)
+        if (json.data.promotion && json.data.promotion.cutoffSeconds > 10000)
             tmp.isPay = false
-        
-        if(json.data.isShowStrategy)
+
+        if (json.data.isShowStrategy)
             console.log(json.data.bookStrategy)
 
         await this.update(tmp)
@@ -198,18 +198,20 @@ module.exports = function (sequelize, type) {
     Model.prototype.scrapeChaptersBulk = async function (page, { min, max }) {
         if (!page || !this.babelId) return null
 
-
+        console.log(yellow("Listing chapters"))
         let url = api.chapter_groups
             .replace(/<book>/gi, this.babelId)
-        console.log(url)
-        await page.waitFor(numerics.puppeteer_delay)
+
         await page.goto(url)
         //await page.screenshot({ path: "screenshot.tmp.png" })
         json = await page.evaluate(() => {
             return JSON.parse(document.querySelector("body").innerText);
         });
-        
-        if (json.code !== 0) throw { message: "Chapterlist failed" }
+
+        if (json.code !== 0) throw {
+            message: "Chapterlist failed", 
+            code: 4
+        }
 
         min = min * 10000
         max = max * 10000
@@ -243,6 +245,17 @@ module.exports = function (sequelize, type) {
 
         return null
     };
+
+
+    Model.prototype.fetchCookie = async function (page) {
+        const url = api.novel.replace("/api/", "/").replace("<book>", this.babelId)
+        await page.goto(url)
+
+        return true
+    };
+
+
+
 
     Model.associate = models => {
         Model.hasMany(models.Chapter, {

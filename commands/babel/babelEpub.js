@@ -3,12 +3,11 @@ const { isAdmin, isBypass, usageMessage } = require('../../funcs/commandTools')
 const generateEpub = require('../../funcs/generateEpub')
 const { StripMentions } = require('../../funcs/mentions.js')
 const { Novel, Chapter, Setting, Sequelize } = require("../../models")
-const { scrapeNovel } = require("../../funcs/scrapeBabel")
+const scrapeNovel = require("../../funcs/babelNovel/scrapeNovel")
+const LiveMessage = require('../../funcs/liveMessage')
 const { numerics } = global.config;
-const Discord = require('discord.js')
 const tojson = require('./tojson')
 const setting_key = 'epub_channel'
-const RichEmbed = Discord.RichEmbed
 
 module.exports = {
     name: ['babelepub', 'be'],
@@ -34,6 +33,10 @@ module.exports = {
 
         const novel = await Novel.findOne({
             where: Sequelize.or(
+                Sequelize.where(
+                    Sequelize.col('babelId'),
+                    Sequelize.fn('lower', novelStr)
+                ),
                 Sequelize.where(
                     Sequelize.fn('lower', Sequelize.col('name')),
                     Sequelize.fn('lower', novelStr)
@@ -62,15 +65,14 @@ module.exports = {
             if (isBypass(message) && params.check) {
                 while (!r && counter <= max_counter) {
                     await livemsg.init(counter, max_counter)
-                    r = await scrapeNovel(novel, livemsg, params)
+                    r = await scrapeNovel(null, [novel], params, livemsg)
                     counter++;
-                    if (r === 'css_error')
-                        return await livemsg.description("CSS file missing", true)
+                    
+                    if (r.code === 5) break
 
-                    if (!r && counter <= max_counter) {
-                        const fail_timer = 20
-                        await livemsg.description(`Trying again in ${fail_timer} seconds`)
-                        await new Promise(resolve => setTimeout(resolve, fail_timer * 1000))
+                    if (r.code && counter <= max_counter) {
+                        await livemsg.description(`Trying again in ${numerics.retry_seconds / 1000} seconds`)
+                        await new Promise(resolve => setTimeout(resolve, numerics.retry_seconds))
                     }
                 }
             }
@@ -98,13 +100,11 @@ module.exports = {
             if (global.config.generatingEpub)
                 return await livemsg.description("Epub generator in progress. Try again later", true)
 
-            //global.config.generatingEpub = true;
             let epub = await generateEpub(novel, chapters, params)
-            global.config.generatingEpub = false;
 
             return await livemsg.attach(epub, chapters)
         } catch (err) {
-            global.config.generatingEpub = false;
+            console.log(err.message)
             return await livemsg.description(err.message, true)
         }
     },
@@ -114,116 +114,6 @@ module.exports = {
 
 
 };
-
-
-
-class LiveMessage {
-    constructor(message, novel, params) {
-        this.message = message
-        this.novel = novel
-        this.emb = new RichEmbed()
-        this.sent = null
-        this.params = params
-    }
-
-    async init(counter = 1, max = 1) {
-
-        this.emb.setColor('#0099ff')
-            .setTitle(this.novel.name)
-            .setURL(this.novel.Url())
-            .setDescription(`Scraping chapters attempt ${counter} / ${max}`)
-            .setTimestamp()
-            .setFooter(this.novel.canonicalName, this.novel.cover)
-        //.attachFile('./static/epub/ancient-dragon-spell_1-1194.epub')
-
-        return await this.send()
-    }
-
-    async update() {
-        this.emb.setTitle("updated")
-        return await this.send()
-    }
-
-    async description(str, expire) {
-        this.emb.setDescription(str)
-        return await this.send(expire)
-    }
-
-    async setMax(val) {
-        this.max = val
-        this.emb.setDescription(`Found ${this.max} chapters`)
-
-        return await this.send()
-    }
-
-    async progress(val) {
-        this.min = val
-        this.emb.setDescription(`Processing ${this.min} / ${this.max}`)
-
-        return await this.send()
-    }
-
-    async send(expire) {
-        if (this.sent)
-            return await this.sent.edit(this.emb.setTimestamp())
-                .then(msg => msg.Expire(this.message, !expire))
-        else
-            return await this.message.channel.send(
-                this.emb.setTimestamp()).then(msg => {
-                    this.sent = msg
-                    this.sent.Expire(this.message, !expire)
-                })
-        //.setDescription(`${numerics.latest_chapter_limit} latest chapters on https://babelnovel.com/latest-update`)
-        //    .addBlankField()
-    }
-
-    async attach(files) {
-        if (this.sent) {
-            this.sent.Expire(null, null, 1)
-            this.sent = null
-        }
-
-        const Emb = () => {
-            const emb = new RichEmbed()
-                .setTitle(this.novel.name)
-                .setThumbnail(this.novel.cover)
-            return emb
-        }
-
-        if (!files || !files.length) {
-            let emb = Emb()
-            emb.setDescription("something went wrong")
-            await this.message.channel.send(emb).then(msg => msg.Expire(this.message))
-        }
-
-        else {
-            if (typeof (files) === 'string')
-                files = [files]
-            else
-                files = files.reduce((acc, val) => acc.concat(val), [])
-
-            const match = /(?<start>\d*)-(?<stop>\d*)\.epub$/i
-            files.sort((a, b) => {
-                let matchA = parseInt(a.match(match).groups.start)
-                let matchB = parseInt(b.match(match).groups.start)
-                return a - b
-            })
-            console.log("epubs", files)
-
-            for (var i in files) {
-                const file = files[i]
-                let filename = file.split("/")[file.length - 1]
-                await this.message.channel.send(filename, {
-                    file: new Discord.Attachment(file, filename)
-                }).then(msg => msg.Expire(this.message, this.params.keep))
-                    .catch(err => {
-                        this.message.channel.send(err.message, { code: true })
-                            .then(msg => msg.Expire(this.message))
-                    })
-            }
-        }
-    }
-}
 
 const handleParameters = async (parameters, novelStr, message) => {
     let params = {

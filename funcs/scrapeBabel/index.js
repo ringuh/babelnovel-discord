@@ -10,15 +10,6 @@ const fetchCSS = async (page, url) => {
         await page.goto(url);
         // wait for CSS file to load
         await page.waitFor(numerics.puppeteer_delay / 2)
-        // clear prompts
-        /*   await page.evaluate(() => {
-              const prompts = [".ant-modal-mask", ".ant-modal-wrap"]
-              var elements = document.querySelectorAll(prompts);
-              for (var i = 0; i < elements.length; i++) {
-                  elements[i].parentNode.removeChild(elements[i]);
-              }
-          }) */
-
 
         let cssFile = await page.evaluate(() => {
             const cssSelector = "link[href*='content-css']"
@@ -29,7 +20,7 @@ const fetchCSS = async (page, url) => {
             }
         });
 
-        if (!cssFile) return console.log("cssFile not found")
+        if (!cssFile) return "css_error"
 
         let [hash_path, hash] = cssFile.split('?hash=')
         if (hash.length < 5) return null
@@ -52,9 +43,10 @@ const scrapeNovel = async (novel, livemsg, params) => {
     let browser = null
     try {
         browser = await launchBrowser()
+        const page = await browser.newPage();
+
         const url = api.novel.replace("/api/", "/").replace("<book>", novel.babelId)
         console.log(url)
-        const page = await browser.newPage();
         await livemsg.description("Fetching cookie")
         //fetch cookie
         await page.goto(url)
@@ -103,5 +95,5 @@ const scrapeNovel = async (novel, livemsg, params) => {
 
 }
 
-module.exports = { scrapeNovel }
+module.exports = { scrapeNovel, fetchCSS }
 

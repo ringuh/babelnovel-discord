@@ -3,7 +3,9 @@ const puppeteer = require('puppeteer');
 const trackNovels = require('./trackNovels')
 
 
-const launchBrowser = () => {
+const launchBrowser = browser => {
+    if (browser && browser.isConnected())
+        return browser
     return puppeteer.launch({ args: global.config.debian ? ['--no-sandbox', '--disable-setuid-sandbox'] : [] });
 }
 

@@ -15,6 +15,10 @@ module.exports = {
         const novel = await Novel.findOne({
             where: Sequelize.or(
                 Sequelize.where(
+                    Sequelize.col('babelId'),
+                    Sequelize.fn('lower', novelStr)
+                ),
+                Sequelize.where(
                     Sequelize.fn('lower', Sequelize.col('name')),
                     Sequelize.fn('lower', novelStr)
                 ),

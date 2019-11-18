@@ -90,19 +90,17 @@ module.exports = function (sequelize, type) {
         return `https://babelnovel.com/books/${novel.canonicalName}/chapters/${this.canonicalName}`
     }
 
-    Model.prototype.scrapeContent = async function (page, novel, cssHash, update = false) {
+    Model.prototype.scrapeContent = async function (page, novel, cssHash) {
         if (!page || !this.babelId) return null
         const url = api.chapter.replace("<book>", novel.canonicalName).replace("<chapterName>", this.canonicalName)
-        console.log(url)
-        await page.waitFor(numerics.puppeteer_delay)
+
         await page.goto(url)
 
-        //await page.screenshot({ path: "screenshot.tmp.png" })
         let json = await page.evaluate(() => {
             return JSON.parse(document.querySelector("body").innerText);
         });
 
-        if (json.code !== 0) throw { message: "Chapter code is wrong" }
+        if (json.code !== 0) throw { message: "Chapter code is wrong", code: 7 }
 
         json = json.data
         delete json.id
@@ -111,8 +109,6 @@ module.exports = function (sequelize, type) {
 
             const html = SimulateHtml(json.content, cssHash)
             await page.setContent(html)
-            //const element = await page.$("body");
-            //const children = await page.evaluateHandle(e => e.children, element);
 
             let children = await page.evaluate(() => {
                 let ret = []
@@ -120,24 +116,23 @@ module.exports = function (sequelize, type) {
                     if (n.offsetWidth > 0)
                         ret.push(n.innerText)
                 })
-                //let el = document.querySelector("body").children.map(e => e.innerText)
                 return ret
             });
 
-            if (!children.length) {
+            if (!children.length)
                 children = json.content.split("\n").filter(c => c.trim().length)
-            }
 
             json.chapterContent = children.map(n => `<p>${n.trim()}</p>`).join("\n")
         }
-
+        
         delete json.content
-        await this.update(json)
+        await this.update(json).catch(err => {
+            throw { message: `${json.canonicalName} ${err.message}`, type: "chapter_error", code: 6 }
+        })
         if (json.chapterContent)
             return true
 
-        throw { message: "Chapter content is missing", code: -1 }
-
+        throw { message: "Chapter content is missing", type: "chapter_error", code: 6 }
     };
 
 

@@ -7,15 +7,23 @@ const fetchLatest = async (browser) => {
     const excludedNovels = await TrackNovel.findAll({
         include: ['novel']
     }).map(n => n.novel.babelId)
-    
+
     try {
         const page = await browser.newPage();
-        await page.goto("https://babelnovel.com");
+        await page.setRequestInterception(true);
+        page.on('request', async request => {
+            if (!request.isNavigationRequest())
+                return request.continue();
+
+            await page.waitFor(numerics.puppeteer_delay)
+            console.log(request.url())
+            request.continue();
+        });
+        await page.goto("https://babelnovel.com/search");
         const url = `${api.latest_chapters}?pageSize=${numerics.latest_chapter_count}`
-        await page.waitFor(numerics.puppeteer_delay)
         await page.goto(url);
         //await page.screenshot({ path: `babelshot.tmp.png` });
-        console.log(url)
+
         const json = await page.evaluate(() => {
             return JSON.parse(document.querySelector("body").innerText);
         });
@@ -25,10 +33,10 @@ const fetchLatest = async (browser) => {
 
         const arr = json.data.reverse()
         for (var i in arr) {
-            const chapterData = arr[i]; 
+            const chapterData = arr[i];
             if (excludedNovels.includes(chapterData.bookId))
                 continue
-            
+
             const novel = await Novel.findOne({
                 where: {
                     babelId: chapterData.bookId
