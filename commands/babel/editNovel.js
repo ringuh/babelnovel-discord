@@ -96,7 +96,6 @@ const handleParams = (params) => {
             if (!accepted.includes(attr)) return false
 
             r[attr] = value
-            r.paramsOkay = true
         })
     }
     if (Object.keys(r).length)

@@ -33,18 +33,18 @@ module.exports = {
         //await message.channel.startTyping()
         let authLine = [
             novel.abbr,
-            novel.isPay ? 'Premium $': null,
-            novel.isRemoved ? 'Hidden': null,
-            novel.isCompleted ? 'Completed': null
+            novel.isPay ? 'Premium $' : null,
+            novel.isRemoved ? 'Hidden' : null,
+            novel.isCompleted ? 'Completed' : null
         ].filter(l => l).join(" | ")
-        
+
         const emb = new RichEmbed()
             .setColor('#0099ff')
             .setTitle(novel.name)
             .setAuthor(authLine, null, null)
             .setURL(api.novel_home.replace("<book>", novel.canonicalName))
             .setThumbnail(novel.cover)
-            .setDescription(novel.synopsis.substr(0, 1000))
+            .setDescription(novel.synopsis ? novel.synopsis.substr(0, 1000) : 'description missing')
             .setFooter(novel.genre, novel.cover)
             .setTimestamp()
             .addField("bookId", novel.babelId, true)
@@ -57,8 +57,8 @@ module.exports = {
         if (novel.author || novel.authorEn)
             emb.addField("Author",
                 [novel.authorEn, novel.author].filter(a => a && a.length).join(" | "), true)
-            emb.addBlankField()
-        
+        emb.addBlankField()
+
         /*  if (novel.source_name)
              emb.addField("Source", novel.source_name, true) */
         if (novel.source_url)
