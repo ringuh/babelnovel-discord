@@ -30,12 +30,22 @@ module.exports = {
             attributes: [[Sequelize.fn('COUNT', 'id'), 'count']],
             include: ['novel']
         }
-        
-        const novels = await Chapter.findAll(queryStr).then(chapters =>
-            chapters.filter(c => 
+
+        const novel_ids = await Chapter.findAll(queryStr).then(chapters =>
+            chapters.filter(c =>
                 c.dataValues.count > 120 && (!params.greed || c.novel.token == "greed")
-            ).map(c => c.novel)
+            ).map(c => c.novel.id)
         )
+
+        const novels = await Novel.findAll({
+            where: {
+                id: {
+                    [Sequelize.Op.in]: novel_ids
+                }
+            },
+            include: ['trackers'],
+            order: ['canonicalName']
+        });
 
         if (!novels.length)
             return await message.channel.send(

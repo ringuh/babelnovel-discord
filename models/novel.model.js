@@ -130,13 +130,13 @@ module.exports = function (sequelize, type) {
 
     Model.prototype.toJson = function (shortSummary) {
         let r = this.dataValues
-        if (shortSummary){
-            r.synopsis = r.synopsis ? r.synopsis.substr(0, 100): null
-            r.summary = r.summary ? r.summary.substr(0, 100): null
-            r.subTitle = r.subTitle ? r.subTitle.substr(0, 100): null
+        if (shortSummary) {
+            r.synopsis = r.synopsis ? r.synopsis.substr(0, 100) : null
+            r.summary = r.summary ? r.summary.substr(0, 100) : null
+            r.subTitle = r.subTitle ? r.subTitle.substr(0, 100) : null
         }
-            
-        
+
+
         return r
     }
 
@@ -146,7 +146,7 @@ module.exports = function (sequelize, type) {
         return api.novel.replace("/api/", "/").replace("<book>", this.canonicalName)
     }
 
-    Model.prototype.jsonToChapter = function (chapterData, update) {
+    Model.prototype.jsonToChapter = async function (chapterData, update) {
         if (!chapterData) return null
         if (!chapterData.babelId) {
             chapterData.babelId = chapterData.id
@@ -156,7 +156,12 @@ module.exports = function (sequelize, type) {
         if (!update && chapterData.babelId === this.lastChapterBabelId)
             return null
 
-        const chapter = sequelize.models.Chapter.findOrCreate({
+        if (!this.trackers)
+            this.trackers = await sequelize.models.TrackNovel.findAll({
+                where: { novel_id: this.id }
+            })
+
+        const chapter = await sequelize.models.Chapter.findOrCreate({
             where: { novel_id: this.id, babelId: chapterData.babelId }
         }).then(async ([chap, created]) => {
             if (created || update) {
@@ -273,7 +278,12 @@ module.exports = function (sequelize, type) {
         if (!page || !this.babelId) return null
         chapterJson = { ...chapterJson, babelId: chapterJson.id }
         delete chapterJson.id
-        
+
+        if (!this.trackers)
+            this.trackers = await sequelize.models.TrackNovel.findAll({
+                where: { novel_id: this.id }
+            })
+
         const chapter = await sequelize.models.Chapter.findOrCreate({
             where: { novel_id: this.id, babelId: chapterJson.babelId },
             defaults: { canonicalName: chapterJson.canonicalName }
@@ -281,8 +291,8 @@ module.exports = function (sequelize, type) {
             if (created && this.trackers.length) chapterJson.isAnnounced = false
             return await chap.update(chapterJson)
         }
-        ).catch(err => console.log("Novel scrapeC", err.errors))
-       
+        ).catch(err => console.log("Novel scrapeC", err.message))
+
         if (!chapter.chapterContent || force)
             return await chapter.scrapeContent(page, this, cssHash);
 

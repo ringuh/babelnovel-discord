@@ -43,9 +43,21 @@ const { Chapter, Sequelize } = require('./models')
             include: ['novel']
         }
 
-        const novels = await Chapter.findAll(queryStr).then(chapters =>
-            chapters.filter(c => c.dataValues.count > 120).map(c => c.novel)
+        const novel_ids = await Chapter.findAll(queryStr).then(chapters =>
+            chapters.filter(c =>
+                c.dataValues.count > 120 && (!params.greed || c.novel.token == "greed")
+            ).map(c => c.novel.id)
         )
+
+        const novels = await Novel.findAll({
+            where: {
+                id: {
+                    [Sequelize.Op.in]: novel_ids
+                }
+            },
+            include: ['trackers'],
+            order: ['canonicalName']
+        });
 
         await scrapeNovels(browser, novels, params)
     }
