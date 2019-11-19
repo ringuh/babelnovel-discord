@@ -51,6 +51,7 @@ const Announce = async (client, chapters) => {
 const announceNovels = async () => {
     const chapters = await Chapter.findAll({
         where: { isAnnounced: false },
+        order: [['index', "asc"], ['sum', 'asc']],
         include: [{
             model: Novel,
             as: 'novel',
@@ -66,7 +67,7 @@ const announceNovels = async () => {
     const client = new Client();
 
     client.once('ready', async () => {
-        console.log('Discord bot running!');
+        console.log('Announce running!');
         await Announce(client, chapters)
     });
 
