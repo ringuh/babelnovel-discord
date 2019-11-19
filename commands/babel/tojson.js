@@ -2,6 +2,7 @@
 const { isBypass, usageMessage } = require('../../funcs/commandTools')
 const { StripMentions } = require('../../funcs/mentions.js')
 const { Novel, Chapter, Sequelize } = require("../../models")
+const { novelWhere } = require("../../funcs/babelNovel/queryStrings")
 const { numerics } = global.config
 const Discord = require('discord.js')
 const fs = require('fs')
@@ -23,16 +24,7 @@ module.exports = {
             return message.channel.send(`Novel name missing`, { code: true });
 
         const novel = await Novel.findOne({
-            where: Sequelize.or(
-                Sequelize.where(
-                    Sequelize.fn('lower', Sequelize.col('name')),
-                    Sequelize.fn('lower', novelStr)
-                ),
-                Sequelize.where(
-                    Sequelize.fn('lower', Sequelize.col('canonicalName')),
-                    Sequelize.fn('lower', novelStr)
-                )
-            ),
+            where: novelWhere(novelStr),
             include: [// ['chapters']
                 { model: Chapter, as: 'chapters', order: [['Chapter.index', 'ASC']] }
             ]

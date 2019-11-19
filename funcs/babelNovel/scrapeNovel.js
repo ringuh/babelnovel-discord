@@ -1,64 +1,99 @@
 const { numerics, api } = global.config;
 const { launchBrowser } = require('.')
-const urlTool = require('url')
 const { red, green, yellow, magenta, blue } = require('chalk').bold
-const { Setting } = require('../../models')
+const { Novel, TrackNovel, Setting } = require('../../models')
 const fetchCSS = require('./fetchCSS')
 const LiveMessage = require('../liveMessage')
 
-const updateNovels = async (browser, novels, params, livemsg = new LiveMessage()) => {
-    console.log(novels.length)
+const scrapeNovels = async (browser, novels, params, livemsg = new LiveMessage()) => {
+    const reqGroupID = `${params.reqGroupID || Date.now()}`
+    console.log(novels.length, "novels")
+
+    const defaultToken = await Setting.findOne({
+        where: { key: `babel_token_rinku` }
+    }).then(setting => setting ? setting.value : null)
+
     let cssHash = null
     for (var i in novels) {
+        let page = null
         try {
             const novel = novels[i];
-            if(novel.isPay && !params.token) continue
-            let count = 0;
-            console.log(green(novel.name))
-            let busy = null;
+            if (novel.isCompleted && !params.force) continue
+            if (novel.isHiatus && !params.check) continue
+            // check if there is babel token for this particular novel
+            let token = params.token
+            if (!token && novel.token)
+                token = await Setting.findOne({
+                    where: {
+                        key: `babel_token_${novel.token}`
+                    }
+                }).then(setting => setting ? setting.value : null)
+
+            // skip premium novels without token
+            if (novel.isPay && !token) continue
+            // hidden novels need to be in a library
+            if (novel.isRemoved && !token) token = defaultToken
+            // this should never happen
+            if (novel.isRemoved && !token) continue
+
+            if (!livemsg.ignore) await livemsg.init(i, novels.length, novel)
+            console.log(green(novel.name), novel.isPay ? '$':'', novel.isRemoved ? 'removed':'', token)
+
             browser = await launchBrowser(browser)
-            const page = await browser.newPage();
+            page = await browser.newPage();
             await page.setRequestInterception(true);
             page.on('request', async request => {
                 if (!request.isNavigationRequest())
                     return request.continue();
-                
-                    const busy = await Setting.findOne({
-                        where: { key: "puppeteer_busy" },
-                    }).then(setting => {
-                        if(!setting) return false
-                        const startTime = Date.now() - setting.updatedAt
-                        const waitFor = 120*1000
-                        return startTime < waitFor
-                    });
-                if(busy){
+
+                const busy = await Setting.findOrCreate({
+                    where: { key: "puppeteer_busy" },
+                    defaults: {
+                        server: reqGroupID,
+                        value: Date.now()
+                    }
+                }).then(async ([setting, created]) => {
+                    if (setting.server == reqGroupID) {
+                        await setting.update({
+                            server: reqGroupID,
+                            value: Date.now()
+                        })
+                        return false
+                    }
+
+                    const timeSince = Date.now() - setting.updatedAt
+                    const waitFor = 120 * 1000
+
+                    if (timeSince < waitFor) return true
+
+                    await setting.update({
+                        server: reqGroupID,
+                        value: Date.now()
+                    })
+                    return false
+                });
+                if (busy) {
                     console.log(yellow("puppeteer is busy"))
                     await livemsg.description("Puppeteer is busy")
                     return request.abort("aborted");
                 }
-                
-                
 
                 await page.waitFor(numerics.puppeteer_delay)
                 console.log(request.url())
-                if (!params.token) return request.continue();
+                if (!token) return request.continue();
 
                 // Add a new header for navigation request.
                 const headers = request.headers();
-                headers['token'] = params.token
+                headers['token'] = token
                 return request.continue({ headers });
             });
 
-            if(busy)
-                console.log("return busy")
-
-            console.log(params)
             await livemsg.description("Fetching cookie")
             await novel.fetchCookie(page, params)
 
             await livemsg.description("Listing chapters")
             const chapterList = await novel.scrapeChaptersBulk(page, params)
-            if (!chapterList.length) return { code: 0 }
+            if (!chapterList.length) continue;
             
             const min = params.min > 0 ? (params.min) : 1
             await livemsg.setMax(min, chapterList.length)
@@ -71,28 +106,29 @@ const updateNovels = async (browser, novels, params, livemsg = new LiveMessage()
 
             let counter = 0;
             for (var i in chapterList) {
-                if (await novel.scrapeContent(page, chapterList[i], cssHash, params)){
+                if (await novel.scrapeContent(page, chapterList[i], cssHash, params)) {
                     await livemsg.progress(min + parseInt(i))
                     // dont scrape unlimited chapters on automated process
-                    if(params.cron){
+                    if (params.cron) {
                         counter++;
-                        if(counter >= numerics.cron_chapters)
+                        if (counter >= numerics.cron_chapters)
                             break
                     }
                 }
-                    
+
             }
 
             await page.close()
         } catch (err) {
             console.log(red(err.message))
-            livemsg.description(err.message, true)
-            //return { code: err.code || 3, message: err.message }
+            if (page) await page.close()
+            await livemsg.description(err.message)
         }
     }
-    await browser.close()
+    await Setting.destroy({ where: { key: "puppeteer_busy", server: reqGroupID } })
+    if (browser) await browser.close()
     return { code: 0 }
 }
 
-module.exports = updateNovels
+module.exports = scrapeNovels
 

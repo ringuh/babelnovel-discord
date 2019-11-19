@@ -15,6 +15,12 @@ module.exports = function (sequelize, type) {
         },
         babelId: {
             type: type.STRING,
+            unique: true,
+            allowNull: false
+        },
+        abbr: {
+            type: type.STRING,
+            unique: true
         },
         lastChapterBabelId: {
             type: type.STRING
@@ -64,6 +70,8 @@ module.exports = function (sequelize, type) {
         },
         canonicalName: { // martial-arts-peak
             type: type.STRING,
+            unique: true,
+            allowNull: false
         },
         historyCanonicalName: { // martial-arts-peak
             type: type.STRING,
@@ -91,7 +99,23 @@ module.exports = function (sequelize, type) {
         },
         source_name: {
             type: type.STRING
-        }
+        },
+        isCompleted: {
+            type: type.BOOLEAN,
+            defaltValue: false
+        },
+        isHiatus: {
+            type: type.BOOLEAN,
+            defaltValue: false
+        },
+        isRemoved: {
+            type: type.BOOLEAN,
+            defaltValue: false
+        },
+        token: {
+            type: type.STRING
+        },
+
 
 
 
@@ -103,6 +127,19 @@ module.exports = function (sequelize, type) {
     }, {
         timestamps: true,
     });
+
+    Model.prototype.toJson = function (shortSummary) {
+        let r = this.dataValues
+        if (shortSummary){
+            r.synopsis = r.synopsis ? r.synopsis.substr(0, 100): null
+            r.summary = r.summary ? r.summary.substr(0, 100): null
+            r.subTitle = r.subTitle ? r.subTitle.substr(0, 100): null
+        }
+            
+        
+        return r
+    }
+
     Model.prototype.Url = function (apilink = false) {
         if (apilink)
             return api.novel.replace("<book>", this.canonicalName)
@@ -123,6 +160,8 @@ module.exports = function (sequelize, type) {
             where: { novel_id: this.id, babelId: chapterData.babelId }
         }).then(async ([chap, created]) => {
             if (created || update) {
+                if (created && this.trackers) chapterData.isAnnounced = false;
+
                 await this.update({ lastChapterBabelId: chap.babelId })
                 await chap.update(chapterData)
             }
@@ -209,7 +248,7 @@ module.exports = function (sequelize, type) {
         });
 
         if (json.code !== 0) throw {
-            message: "Chapterlist failed", 
+            message: "Chapterlist failed",
             code: 4
         }
 
@@ -234,12 +273,16 @@ module.exports = function (sequelize, type) {
         if (!page || !this.babelId) return null
         chapterJson = { ...chapterJson, babelId: chapterJson.id }
         delete chapterJson.id
-
+        
         const chapter = await sequelize.models.Chapter.findOrCreate({
-            where: { novel_id: this.id, babelId: chapterJson.babelId }
-        }).then(([chap, created]) => chap.update(chapterJson)
+            where: { novel_id: this.id, babelId: chapterJson.babelId },
+            defaults: { canonicalName: chapterJson.canonicalName }
+        }).then(async ([chap, created]) => {
+            if (created && this.trackers) chapterJson.isAnnounced = false
+            return await chap.update(chapterJson)
+        }
         ).catch(err => console.log("Novel scrapeC", err.errors))
-
+       
         if (!chapter.chapterContent || force)
             return await chapter.scrapeContent(page, this, cssHash);
 

@@ -58,6 +58,10 @@ module.exports = function (sequelize, type) {
             unique: true,
             allowNull: false
         },
+        isAnnounced: {
+            type: type.BOOLEAN,
+            defaultValue: true
+        },
 
         /* { bookId: '66e747f8-05ca-44fc-8204-75c8bc9af26a',
         bookCanonicalName: 'monarch-of-the-dark-nights',

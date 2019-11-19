@@ -1,6 +1,8 @@
 *.tmp 
 *.tmp.png
 *.tmp.pdf
+*.tmp.js
+*.tmp.json
 screenshotChapter.js
 package-lock.json
 config.json

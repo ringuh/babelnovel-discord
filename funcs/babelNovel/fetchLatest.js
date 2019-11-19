@@ -4,10 +4,6 @@ const { TrackNovel, Novel } = require('../../models')
 const fetchLatest = async (browser) => {
     console.log("fetching latest")
 
-    const excludedNovels = await TrackNovel.findAll({
-        include: ['novel']
-    }).map(n => n.novel.babelId)
-
     try {
         const page = await browser.newPage();
         await page.setRequestInterception(true);
@@ -34,13 +30,11 @@ const fetchLatest = async (browser) => {
         const arr = json.data.reverse()
         for (var i in arr) {
             const chapterData = arr[i];
-            if (excludedNovels.includes(chapterData.bookId))
-                continue
-
             const novel = await Novel.findOne({
                 where: {
                     babelId: chapterData.bookId
-                }
+                },
+                include: ['trackers']
             })
             if (!novel) continue
             await novel.jsonToChapter(chapterData)

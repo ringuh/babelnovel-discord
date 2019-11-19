@@ -1,4 +1,4 @@
-const { isAdmin, usageMessage } = require('../funcs/commandTools')
+const { isBypass, usageMessage } = require('../funcs/commandTools')
 const { Setting } = require('../models')
 const { IsMention } = require('../funcs/mentions')
 
@@ -6,9 +6,9 @@ module.exports = {
     name: ['setting'],
     description: 'Set a server setting (admin)',
     args: "<setting> <value>",
-
+    hidden: true,
     async execute(message, args) {
-        if (!isAdmin(message)) return false
+        if (!isBypass(message)) return false
         if (args.length < 1) return usageMessage(message, this)
 
         const setting = args[0].toLowerCase()

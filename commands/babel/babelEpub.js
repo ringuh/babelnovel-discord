@@ -3,6 +3,7 @@ const { isAdmin, isBypass, usageMessage } = require('../../funcs/commandTools')
 const generateEpub = require('../../funcs/generateEpub')
 const { StripMentions } = require('../../funcs/mentions.js')
 const { Novel, Chapter, Setting, Sequelize } = require("../../models")
+const { novelWhere } = require("../../funcs/babelNovel/queryStrings")
 const scrapeNovel = require("../../funcs/babelNovel/scrapeNovel")
 const LiveMessage = require('../../funcs/liveMessage')
 const { numerics } = global.config;
@@ -10,7 +11,7 @@ const tojson = require('./tojson')
 const setting_key = 'epub_channel'
 
 module.exports = {
-    name: ['babelepub', 'be'],
+    name: ['babelepub', 'be', 'epub'],
     description: 'Generates epubs from scraped novels',
     args: "<novel>",
     //hidden: true,
@@ -32,21 +33,8 @@ module.exports = {
         novelStr = params.novelStr
 
         const novel = await Novel.findOne({
-            where: Sequelize.or(
-                Sequelize.where(
-                    Sequelize.col('babelId'),
-                    Sequelize.fn('lower', novelStr)
-                ),
-                Sequelize.where(
-                    Sequelize.fn('lower', Sequelize.col('name')),
-                    Sequelize.fn('lower', novelStr)
-                ),
-                Sequelize.where(
-                    Sequelize.fn('lower', Sequelize.col('canonicalName')),
-                    Sequelize.fn('lower', novelStr)
-                )
-            ),
-            include: ['chapters']
+            where: novelWhere(novelStr),
+            include: ['chapters', 'trackers']
         })
         if (!novel)
             return await message.channel.send(
@@ -67,7 +55,7 @@ module.exports = {
                     await livemsg.init(counter, max_counter)
                     r = await scrapeNovel(null, [novel], params, livemsg)
                     counter++;
-                    
+
                     if (r.code === 5) break
 
                     if (r.code && counter <= max_counter) {
@@ -91,9 +79,8 @@ module.exports = {
             })
             if (!chapters.length)
                 return await livemsg.description(
-                    global.config.babelepub ?
-                        "No chapters with content found for this novel\ncheck !listepubs" :
-                        "This novel hasn't been parsed by superuser", true)
+                    "No chapters with content found for this novel\ncheck !listepubs", true
+                )
             if (params.tojson) tojson.execute(message, [novelStr])
             if (params.noepub) return await livemsg.description("Parse finished. Skipping epub", true)
             await livemsg.description("Generating epub")
@@ -104,7 +91,7 @@ module.exports = {
 
             return await livemsg.attach(epub, chapters)
         } catch (err) {
-            console.log(err.message)
+            console.log(err)
             return await livemsg.description(err.message, true)
         }
     },
@@ -137,8 +124,7 @@ const handleParameters = async (parameters, novelStr, message) => {
 
     if (params.token && params.token.length < 40) await Setting.findOne({
         where: {
-            key: `babel_token_${params.token}`,
-            server: message.guild.id
+            key: `babel_token_${params.token}`
         }
     }).then(setting => setting ? params.token = setting.value : null)
 

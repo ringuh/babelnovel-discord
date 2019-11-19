@@ -5,12 +5,8 @@ const { red } = chalk.bold
 
 const fetchNovels = async (browser) => {
     console.log("fetching novels")
-    /* const novels = await Novel.findAll({})
-    if (novels.length) return true */
-    const excludedNovels = await TrackNovel.findAll({
-        include: ['novel']
-    }).map(n => n.novel.babelId)
 
+    const reqGroupID = "fetchNovels"
     try {
         const page = await browser.newPage();
         await page.setRequestInterception(true);
@@ -18,11 +14,13 @@ const fetchNovels = async (browser) => {
             if (!request.isNavigationRequest())
                 return request.continue();
 
+            // this novel surpasses all other processes
+            const timestamp = Date.now()
             await Setting.findOrCreate({
                 where: { key: "puppeteer_busy" },
-                defaults: { value: Date.now(), server: 'localhost' }
+                defaults: { value: timestamp, server: reqGroupID }
             }).then(async ([setting, created]) => {
-                await setting.update({ value: Date.now() })
+                await setting.update({ value: timestamp, server: reqGroupID })
                 return setting
             });
 
@@ -47,17 +45,15 @@ const fetchNovels = async (browser) => {
             for (var i in json.data) {
                 const novelData = json.data[i]
                 novelData.babelId = novelData.id
+                novelData.isRemoved = false;
                 delete novelData.id
-
-                if (excludedNovels.includes(novelData.babelId))
-                    continue
 
                 novelData.genre = novelData.genres.map(genre => genre.name).filter(n => n).join(" | ")
 
                 const novel = await Novel.findOrCreate({
-                    where: {
-                        babelId: novelData.babelId
-                    }
+                    where: { babelId: novelData.babelId },
+                    defaults: { canonicalName: novelData.canonicalName || Date.now().toString() },
+                    include: ['trackers']
                 }).then(async ([nov, created]) => {
                     await nov.jsonToChapter(novelData.lastChapter)
                     return await nov.update(novelData).then(async n => {
@@ -66,15 +62,14 @@ const fetchNovels = async (browser) => {
                     })
 
                 }).catch(err => console.log(err))
-
             }
-
         }
-        
+
+        await Setting.destroy({ where: { key: "puppeteer_busy", server: reqGroupID } })
         await page.close()
 
     } catch (e) {
-        
+
         console.log(red(e.message))
     }
 }

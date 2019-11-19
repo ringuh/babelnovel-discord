@@ -10,7 +10,6 @@ Object.keys(global.config.numerics).forEach(k => {
 const { Client, Collection, Message } = require('discord.js');
 const fs = require('fs');
 const path = require('path')
-const { BabelNovel } = require('./funcs/babelNovel')
 const { botPermission } = require('./funcs/commandTools')
 const client = new Client();
 client.commands = new Collection();
@@ -48,11 +47,6 @@ client.once('ready', () => {
     console.log('Discord bot running!');
     const commandJs = require('./commands/commands')
     client.user.setActivity(`${prefix}${commandJs.name[0]}`, { type: "LISTENING" });
-
-    BabelNovel(client)
-
-
-
 });
 
 client.on('message', message => {

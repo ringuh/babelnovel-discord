@@ -13,7 +13,8 @@ class LiveMessage {
         this.params = params
     }
 
-    async init(counter, max) {
+    async init(counter, max, novel) {
+        if (novel) this.novel = novel
         this.emb.setColor('#0099ff')
             .setTitle(this.novel.name)
             .setURL(this.novel.Url())
@@ -58,12 +59,13 @@ class LiveMessage {
         if (this.sent)
             return await this.sent.edit(this.emb.setTimestamp())
                 .then(msg => msg.Expire(this.message, !expire))
+                .catch(err => console.log("!!", err.message))
         else
             return await this.message.channel.send(
                 this.emb.setTimestamp()).then(msg => {
                     this.sent = msg
                     this.sent.Expire(this.message, !expire)
-                })
+                }).catch(err => console.log("!!!", err.message))
         //.setDescription(`${numerics.latest_chapter_limit} latest chapters on https://babelnovel.com/latest-update`)
         //    .addBlankField()
     }

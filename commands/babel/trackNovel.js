@@ -2,6 +2,7 @@
 const { isAdmin, usageMessage } = require('../../funcs/commandTools')
 const { StripMentions } = require('../../funcs/mentions.js')
 const { TrackNovel, Novel, Sequelize } = require("../../models")
+const { novelWhere } = require("../../funcs/babelNovel/queryStrings")
 
 module.exports = {
     name: ['tracknovel'],
@@ -17,16 +18,7 @@ module.exports = {
             return message.channel.send(`Novel name missing`, { code: true });
 
         const novel = await Novel.findOne({
-            where: Sequelize.or(
-                Sequelize.where(
-                    Sequelize.fn('lower', Sequelize.col('name')),
-                    Sequelize.fn('lower', novelStr)
-                ),
-                Sequelize.where(
-                    Sequelize.fn('lower', Sequelize.col('canonicalName')),
-                    Sequelize.fn('lower', novelStr)
-                )
-            )
+            where: novelWhere(novelStr)
         })
         if (!novel) return message.channel.send(`Novel by name or alias '${novelStr}' not found`, { code: true });
         

@@ -1,6 +1,7 @@
 
 const { usageMessage } = require('../../funcs/commandTools')
 const { Novel, Chapter, Sequelize } = require("../../models")
+const { novelWhere } = require("../../funcs/babelNovel/queryStrings")
 const { RichEmbed } = require('discord.js')
 const { api, numerics } = global.config
 
@@ -13,20 +14,7 @@ module.exports = {
 
         const novelStr = args.join(" ")
         const novel = await Novel.findOne({
-            where: Sequelize.or(
-                Sequelize.where(
-                    Sequelize.col('babelId'),
-                    Sequelize.fn('lower', novelStr)
-                ),
-                Sequelize.where(
-                    Sequelize.fn('lower', Sequelize.col('name')),
-                    Sequelize.fn('lower', novelStr)
-                ),
-                Sequelize.where(
-                    Sequelize.fn('lower', Sequelize.col('canonicalName')),
-                    Sequelize.fn('lower', novelStr)
-                )
-            ),
+            where: novelWhere(novelStr),
             include: [{
                 model: Chapter, as: 'chapters',
                 where: {
@@ -43,10 +31,17 @@ module.exports = {
         ).then(msg => msg.Expire(message))
 
         //await message.channel.startTyping()
-
+        let authLine = [
+            novel.abbr,
+            novel.isPay ? 'Premium $': null,
+            novel.isRemoved ? 'Hidden': null,
+            novel.isCompleted ? 'Completed': null
+        ].filter(l => l).join(" | ")
+        
         const emb = new RichEmbed()
             .setColor('#0099ff')
             .setTitle(novel.name)
+            .setAuthor(authLine, null, null)
             .setURL(api.novel_home.replace("<book>", novel.canonicalName))
             .setThumbnail(novel.cover)
             .setDescription(novel.synopsis.substr(0, 1000))
@@ -62,7 +57,8 @@ module.exports = {
         if (novel.author || novel.authorEn)
             emb.addField("Author",
                 [novel.authorEn, novel.author].filter(a => a && a.length).join(" | "), true)
-
+            emb.addBlankField()
+        
         /*  if (novel.source_name)
              emb.addField("Source", novel.source_name, true) */
         if (novel.source_url)
