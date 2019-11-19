@@ -52,6 +52,7 @@ const announceNovels = async () => {
     const chapters = await Chapter.findAll({
         where: { isAnnounced: false },
         order: [['index', "asc"], ['sum', 'asc']],
+        limit: 20,
         include: [{
             model: Novel,
             as: 'novel',
