@@ -1,5 +1,5 @@
 const chalk = require('chalk')
-const { api } = global.config;
+const { api, numerics } = global.config;
 const { Novel, TrackNovel, Setting } = require('../../models')
 const { red } = chalk.bold
 
