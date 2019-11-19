@@ -22,8 +22,18 @@ module.exports = {
             },
             group: ['novel.id'],
             attributes: [[Sequelize.fn('COUNT', 'id'), 'chapterCount']],
-            include: [{ model: Novel, as: 'novel', attributes: ['name', 'canonicalName'] }]
+            include: [{
+                model: Novel,
+                as: 'novel',
+                attributes: ['name', 'canonicalName'],
+                required: true
+            }]
         }
+
+        if (args.length > 0) {
+            queryStr.include[0].where = { token: args[0] }
+        }
+       
         await message.channel.startTyping()
 
         Chapter.findAll(queryStr).then(chapters => {
@@ -34,7 +44,8 @@ module.exports = {
                     canonicalName: chapter.novel.canonicalName,
                     url: api.novel_home.replace("<book>", chapter.novel.canonicalName)
                 }
-            }).filter(c => c.count > 100).sort((a, b) => b.count - a.count)
+            }).filter(c => c.count > 100)
+                .sort((a, b) => b.count - a.count)
 
             let descriptionStr = `Available epubs (${novels.length})\n\n` +
                 `!babelepub <name> [start / start - stop]\n\n` +
