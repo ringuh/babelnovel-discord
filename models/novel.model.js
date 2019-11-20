@@ -42,6 +42,11 @@ module.exports = function (sequelize, type) {
             set(val) {
                 val = val ? urlTool.parse(val).href : null
                 this.setDataValue('cover', val)
+            },
+            get() {
+                let val = this.getDataValue('cover')
+                val = val ? urlTool.parse(val).href : val
+                return val
             }
         },
         name: { // Martial Arts Peak
@@ -274,7 +279,7 @@ module.exports = function (sequelize, type) {
     }
 
 
-    Model.prototype.scrapeContent = async function (page, chapterJson, cssHash, { force }) {
+    Model.prototype.scrapeContent = async function (page, chapterJson, cssHash, params) {
         if (!page || !this.babelId) return null
         chapterJson = { ...chapterJson, babelId: chapterJson.id }
         delete chapterJson.id
@@ -293,8 +298,8 @@ module.exports = function (sequelize, type) {
         }
         ).catch(err => console.log("Novel scrapeC", err.message))
 
-        if (!chapter.chapterContent || force)
-            return await chapter.scrapeContent(page, this, cssHash);
+        if (!chapter.chapterContent || params.force)
+            return await chapter.scrapeContent(page, this, cssHash, params);
 
         return null
     };

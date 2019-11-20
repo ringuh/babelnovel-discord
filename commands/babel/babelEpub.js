@@ -115,6 +115,7 @@ const handleParameters = async (parameters, novelStr, message) => {
         noepub: parameters.includes('noepub') || parameters.includes('tojson'),
         tojson: parameters.includes('tojson'),
         keep: parameters.includes('keep'),
+        ignore: parameters.includes('ignore'),
         token: null,
     }
 

@@ -94,7 +94,7 @@ module.exports = function (sequelize, type) {
         return `https://babelnovel.com/books/${novel.canonicalName}/chapters/${this.canonicalName}`
     }
 
-    Model.prototype.scrapeContent = async function (page, novel, cssHash) {
+    Model.prototype.scrapeContent = async function (page, novel, cssHash, params) {
         if (!page || !this.babelId) return null
         const url = api.chapter.replace("<book>", novel.canonicalName).replace("<chapterName>", this.canonicalName)
 
@@ -108,6 +108,7 @@ module.exports = function (sequelize, type) {
 
         json = json.data
         delete json.id
+        
         if (json.content &&
             (json.isBorrowed || json.isBought || json.isFree || json.isLimitFree)) {
 
@@ -133,9 +134,11 @@ module.exports = function (sequelize, type) {
         await this.update(json).catch(err => {
             throw { message: `${json.canonicalName} ${err.message}`, type: "chapter_error", code: 6 }
         })
-        if (json.chapterContent)
-            return true
 
+
+        if (json.chapterContent || params.ignore)
+            return true
+        
         throw { message: "Chapter content is missing", type: "chapter_error", code: 6 }
     };
 

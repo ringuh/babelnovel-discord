@@ -4,7 +4,7 @@ const { numerics } = global.config
 const fs = require('fs');
 
 module.exports = {
-    name: ['listnovels'],
+    name: ['listnovels', 'listnovel'],
     description: 'Lists novels',
     args: "[genre/all]",
     async execute(message, args, params) {
@@ -16,6 +16,9 @@ module.exports = {
                 isPay: {
                     [Sequelize.Op.not]: true
                 },
+                releasedChapterCount: {
+                    [Sequelize.Op.gt]: 0
+                },
                 updatedAt: {
                     [Sequelize.Op.gte]: weekAgo,
                 }
@@ -26,7 +29,7 @@ module.exports = {
         let novelStr = args.length ? args.join(' ').trim() : ""
         if (novelStr.length) {
             if (novelStr.toLowerCase() === "all")
-                delete queryStr.where
+                delete queryStr.where.isPay
             else {
                 queryStr.where['$genre$'] = { [Sequelize.Op.iLike]: `%${novelStr}%` }
                 novelStr = `free_${novelStr}`
@@ -36,12 +39,27 @@ module.exports = {
         else novelStr = "free"
 
 
+        const epub_count = await Chapter.findAll({
+            where: {
+                chapterContent: {
+                    [Sequelize.Op.not]: null
+                }
+            },
+            group: ['novel.id'],
+            attributes: [[Sequelize.fn('COUNT', 'id'), 'count']],
+            include: ['novel']
+        }).map(c => { return { novel_id: c.novel.id, count: c.dataValues.count } })
 
         await Novel.findAll(queryStr).then(novels => {
             let toFile = [
-                "<html><header>",
+                "<html><header><style>",
+                "body { margin: 0.5em }",
+                "li { margin-bottom: 0.5em }",
+                "button { margin-left: 0.5em }",
+                "span { font-size: 80% }",
+                "</style>",
                 `<title>Babelnovel ${novelStr} novels (${novels.length})</title>`,
-                "<body>",
+                "</header><body>",
                 `<h3>Babelnovel ${novelStr} novels (${novels.length})<h3>`,
                 "<ol>",
             ];
@@ -52,13 +70,29 @@ module.exports = {
 
             for (var i = 0; i < novels.length; ++i) {
                 const novel = novels[i];
+
+                let authLine = [
+                    novel.abbr,
+                    novel.isPay ? 'premium' : null,
+                    novel.isRemoved ? 'removed' : null,
+                    novel.isHiatus ? 'hiatus' : null,
+                    novel.isCompleted ? 'completed' : null
+                ].filter(l => l).join(" | ")
+
+                novel.epubs = epub_count.find(n => n.novel_id === novel.id)
+                let epubline = novel.epubs ?
+                    `<br><span>epub: ${novel.epubs.count}</span>` : ''
                 novel.chapters = novel.chapters || []
                 let parsed = ''// novel.chapters.length
                 //parsed = parsed ? `(epub: ${parsed} chapters)` : ''
                 const header = `${novel.name} - ${novel.releasedChapterCount} ${parsed}`
                 const url = novel.Url()
                 //toFile.push(`${i + 1}. [${header}](${url})`)
-                toFile.push(`<li><a href='${url}'>${header}</a></li>`)
+                toFile.push(`<li><a href='${url}'>${header}</a>` +
+                    epubline +
+                    `<br><span>${authLine}</span>` +
+                    `</li>`)
+
                 if (i < numerics.latest_chapter_limit)
                     announceEmbed.addField(header, url)
             }

@@ -25,7 +25,15 @@ module.exports = {
             include: [{
                 model: Novel,
                 as: 'novel',
-                attributes: ['name', 'canonicalName'],
+                attributes: [
+                    'name',
+                    'canonicalName',
+                    "abbr",
+                    "isPay",
+                    "isRemoved",
+                    "isHiatus",
+                    "isCompleted"
+                ],
                 required: true
             }]
         }
@@ -33,7 +41,7 @@ module.exports = {
         if (args.length > 0) {
             queryStr.include[0].where = { token: args[0] }
         }
-       
+
         await message.channel.startTyping()
 
         Chapter.findAll(queryStr).then(chapters => {
@@ -42,7 +50,12 @@ module.exports = {
                     count: parseInt(chapter.dataValues.chapterCount),
                     name: chapter.novel.name,
                     canonicalName: chapter.novel.canonicalName,
-                    url: api.novel_home.replace("<book>", chapter.novel.canonicalName)
+                    url: api.novel_home.replace("<book>", chapter.novel.canonicalName),
+                    abbr: chapter.novel.abbr,
+                    isPay: chapter.novel.isPay,
+                    isRemoved: chapter.novel.isRemoved,
+                    isHiatus: chapter.novel.isHiatus,
+                    isCompleted: chapter.novel.isCompleted,
                 }
             }).filter(c => c.count > 100)
                 .sort((a, b) => b.count - a.count)
@@ -59,14 +72,14 @@ module.exports = {
                 "body { margin: 0.5em }",
                 "li { margin-bottom: 0.5em }",
                 "button { margin-left: 0.5em }",
+                "span { font-size: 80% }",
                 "</style>",
                 "<script>",
                 `function copy(line) {
                     try {
                         navigator.clipboard.writeText(line);
-                        alert("copied: " + line)
                     } catch (e) {
-                        alert("You should use chrome.")
+
                     }
                 }`,
                 "</script>",
@@ -77,13 +90,21 @@ module.exports = {
             ];
             for (var i in novels) {
                 const novel = novels[i]
+                let authLine = [
+                    novel.abbr,
+                    novel.isPay ? 'premium' : null,
+                    novel.isRemoved ? 'removed' : null,
+                    novel.isHiatus ? 'hiatus' : null,
+                    novel.isCompleted ? 'completed' : null
+                ].filter(l => l).join(" | ")
+
                 const line = `!babelepub ${novel.canonicalName}`
-                toFile.push(`<li><a href='${novel.url}'>${novel.name} - ${novel.count}</a>` +
-                    `<button onClick="copy('${line}')">copy</button>` +
-                    `<br>${line}</li>`)
+                toFile.push(`<li><a href='${novel.url}'>${novel.name} - ${novel.count}</a> ` +
+                    ` <button onClick="copy('${line}')"> copy </button>` +
+                    `<br>${line}<br><span>${authLine}</span></li>`)
             }
 
-            toFile.push("</ol>", "</body>", "</>")
+            toFile.push("</ol>", "</body>", "</em>")
 
             const fName = `babelepub_${novels.length}.html`
             const fPath = `static/${fName}`
