@@ -35,6 +35,7 @@ module.exports = {
             novel.abbr,
             novel.isPay ? 'Premium $' : null,
             novel.isRemoved ? 'Hidden' : null,
+            novel.isHiatus ? 'Hiatus' : null,
             novel.isCompleted ? 'Completed' : null
         ].filter(l => l).join(" | ")
 
