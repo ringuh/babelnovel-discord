@@ -1,4 +1,5 @@
 global.config = require('./config.json');
+const { numerics } = global.config
 const { launchBrowser } = require('./funcs/babelNovel')
 const fetchLatest = require('./funcs/babelNovel/fetchLatest')
 const fetchNovels = require('./funcs/babelNovel/fetchNovels')
@@ -45,7 +46,7 @@ const { Chapter, Sequelize } = require('./models')
 
         const novel_ids = await Chapter.findAll(queryStr).then(chapters =>
             chapters.filter(c =>
-                c.dataValues.count > 120 && (!params.greed || c.novel.token == "greed")
+                c.dataValues.count > numerics.update_chapter_limit && (!params.greed || c.novel.token == "greed")
             ).map(c => c.novel.id)
         )
 
