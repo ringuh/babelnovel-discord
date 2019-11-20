@@ -99,7 +99,7 @@ const handleParameters = async (parameters) => {
     }
 
     let limit = parameters.find(p => p.startsWith("limit="))
-    params.limit = parseInt(limit.split("=")[1]) || params.limit
+    params.limit = limit ? parseInt(limit.split("=")[1]) : params.limit
 
     let token = parameters.find(p => p.startsWith("token="))
     if (!token && parameters.includes('token')) params.token = "rinku"

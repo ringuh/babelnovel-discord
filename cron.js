@@ -6,7 +6,7 @@ const fetchNovels = require('./funcs/babelNovel/fetchNovels')
 const scrapeNovels = require('./funcs/babelNovel/scrapeNovel')
 const announceNovels = require('./funcs/babelNovel/announceNovels')
 const trackNovels = require('./funcs/babelNovel/trackNovels')
-const { Chapter, Sequelize } = require('./models')
+const { Chapter, Novel, Sequelize } = require('./models')
 
 !(async () => {
     const browser = await launchBrowser()
