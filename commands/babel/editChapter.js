@@ -66,12 +66,12 @@ module.exports = {
         if (!chapter) return message.channel.send(`Chapter '${novelStr}' not found'`,
             { code: true }).then(msg => msg.Expire(message, params.keep))
 
-        if (params.force){
+        if (params.force) {
             chapter = await chapter.update(params).catch(err =>
                 message.channel.send(`Error: ${err.message}`,
                     { code: true }).then(msg => msg.Expire(message)))
         }
-            
+
 
         let c = { ...chapter.dataValues }
         c.chapterContent = c.chapterContent ?
@@ -100,6 +100,11 @@ const handleParams = (params) => {
     let r = {}
     if (params.includes("keep")) r.keep = true
     if (params.includes("force")) r.force = true
+    if (params.includes("fix")) {
+        r.chapterContent = "chapter content is missing"
+        let chap = params.find(p => p.startsWith("chapter=c"))
+        if (chap) chap.replace("chapter=c", "")
+    }
     params.forEach(p => {
         let [attr, value] = p.split("=")
         if (!accepted.includes(attr)) return false
