@@ -40,15 +40,6 @@ module.exports = function (sequelize, type) {
         },
         cover: { // 78c8d251-1812-4927-bbe2-d0d3bcdef976
             type: type.STRING,
-            set(val) {
-                val = val ? urlTool.parse(val).href : null
-                this.setDataValue('cover', val)
-            },
-            get() {
-                let val = this.getDataValue('cover')
-                val = val ? urlTool.parse(val).href : val
-                return val
-            }
         },
         name: { // Martial Arts Peak
             type: type.STRING,
