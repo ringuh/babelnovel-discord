@@ -39,14 +39,16 @@ module.exports = {
             novel.isCompleted ? 'Completed' : null
         ].filter(l => l).join(" | ")
 
+        const [coverName, coverAttachment] = novel.DiscordCover()
         const emb = new RichEmbed()
             .setColor('#0099ff')
             .setTitle(novel.name)
             .setAuthor(authLine, null, null)
             .setURL(api.novel_home.replace("<book>", novel.canonicalName))
-            .setThumbnail(novel.cover)
+            .attachFile(coverAttachment)
+            .setThumbnail(coverName)
             .setDescription(novel.synopsis ? novel.synopsis.substr(0, 1000) : 'description missing')
-            .setFooter(novel.genre, novel.cover)
+            .setFooter(novel.genre, coverName)
             .setTimestamp()
             .addField("bookId", novel.babelId, true)
             .addField("Rating", Math.round(novel.ratingNum * 100) / 100, true)

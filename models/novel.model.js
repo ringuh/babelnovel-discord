@@ -1,5 +1,6 @@
 const { api, numerics } = global.config
 const { red, green, yellow, magenta, blue } = require('chalk').bold
+const downloadImage = require('../funcs/downloadImage')
 const urlTool = require('url')
 
 module.exports = function (sequelize, type) {
@@ -151,6 +152,17 @@ module.exports = function (sequelize, type) {
         return api.novel.replace("/api/", "/").replace("<book>", this.canonicalName)
     }
 
+    Model.prototype.DiscordCover = function () {
+        if (!this.cover) return [null, null]
+        if (!this.cover.startsWith("static/")) return [null, null]
+
+        const coverFile = this.cover.split('/').slice(-1).pop()
+        const coverAttachment = `attachment://${coverFile}`
+        return [coverAttachment, this.cover]
+    }
+
+
+
     Model.prototype.jsonToChapter = async function (chapterData, update) {
         if (!chapterData) return null
         if (!chapterData.babelId) {
@@ -205,8 +217,21 @@ module.exports = function (sequelize, type) {
         if (json.data.promotion && json.data.promotion.cutoffSeconds > 10000)
             tmp.isPay = false
 
-        if (json.data.isShowStrategy)
-            console.log(json.data.bookStrategy)
+        if (json.data.isShowStrategy) {
+            //json.data.isRemoved = true
+            console.log(json.data.bookStrategy.strategy)
+        }
+
+        const folder = "static/cover"
+
+        if (!this.cover || !this.cover.startsWith(folder)) {
+            const fn = `${this.canonicalName}.png`
+            try {
+                tmp.cover = await downloadImage(json.data.cover, fn, folder)
+            } catch (err) { console.log(red("error", err.message)) }
+
+        }
+
 
         await this.update(tmp)
 
@@ -252,7 +277,7 @@ module.exports = function (sequelize, type) {
             .replace(/<book>/gi, this.babelId)
 
         await page.goto(url)
-        //await page.screenshot({ path: "screenshot.tmp.png" })
+        await page.screenshot({ path: "screenshot.tmp.png" })
         json = await page.evaluate(() => {
             return JSON.parse(document.querySelector("body").innerText);
         });

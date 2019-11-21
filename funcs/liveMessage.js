@@ -15,11 +15,14 @@ class LiveMessage {
 
     async init(counter, max, novel) {
         if (novel) this.novel = novel
+
+        const [coverName, coverAttachment] = this.novel.DiscordCover()
         this.emb.setColor('#0099ff')
+            .attachFile(coverAttachment)
             .setTitle(this.novel.name)
             .setURL(this.novel.Url())
             .setTimestamp()
-            .setFooter(this.novel.canonicalName, this.novel.cover)
+            .setFooter(this.novel.canonicalName, coverName)
             .setDescription(counter ?
                 `Scraping chapters attempt ${counter} / ${max}` :
                 "Initializing novel"
@@ -77,9 +80,11 @@ class LiveMessage {
         }
 
         const Emb = () => {
+            const [coverName, coverAttachment] = this.novel.DiscordCover()
             const emb = new RichEmbed()
                 .setTitle(this.novel.name)
-                .setThumbnail(this.novel.cover)
+                .attachFile(coverAttachment)
+                .setThumbnail(coverName)
             return emb
         }
 

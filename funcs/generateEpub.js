@@ -65,31 +65,4 @@ const generateEpub = async (novel, chapters, params) => {
 
 };
 
-
-const DownloadCover = async (novel) => {
-    if (!novel.cover) return null
-    let path = `./static/cover`
-    if (!fs.existsSync(path)) fs.mkdirSync(path)
-
-    path = `${path}/${novel.canonicalName}${pathTool.extname(novel.cover)}`
-    const writer = fs.createWriteStream(path)
-    console.log(path)
-
-
-    const response = await Axios({
-        url: encodeURI(novel.cover),
-        method: 'GET',
-        responseType: 'stream'
-    }).catch(e => console.log(e))
-
-    response.data.pipe(writer)
-
-    return new Promise((resolve, reject) => {
-        writer.on('finish', () => resolve(path))
-        writer.on('error', (err) => reject(null))
-    });
-}
-
-
-
 module.exports = generateEpub

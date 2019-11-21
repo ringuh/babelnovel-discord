@@ -7,7 +7,7 @@ const LiveMessage = require('../liveMessage')
 
 const scrapeNovels = async (browser, novels, params, livemsg = new LiveMessage()) => {
     const reqGroupID = `${params.reqGroupID || Date.now()}`
-    console.log(novels.length, "novels")
+    console.log(blue("Scraping novels:", novels.length))
 
     const defaultToken = await Setting.findOne({
         where: { key: `babel_token_rinku` }
@@ -93,6 +93,7 @@ const scrapeNovels = async (browser, novels, params, livemsg = new LiveMessage()
 
             await livemsg.description("Listing chapters")
             const chapterList = await novel.scrapeChaptersBulk(page, params)
+            console.log(chapterList.length)
             if (!chapterList.length) continue;
             
             const min = params.min > 0 ? (params.min) : 1
