@@ -14,10 +14,10 @@ async function downloadImage(url, filename, folder) {
         }).then(async response => {
             const buffer = Buffer.from(response.data, 'binary')
             await sharp(buffer).resize(200).png({ lossless: false }).toFile(path)
-                .then(f => setTimeout(() => { resolve(path) }, 1000))
-                .catch(err => setTimeout(() => { reject({ message: err.message }) }, 1000))
+                .then(f => setTimeout(() => { resolve(path) }, 500))
+                .catch(err => setTimeout(() => { reject({ message: err.message }) }, 500))
         }).catch(err => {
-            setTimeout(() => { reject({ message: err.message }) }, 1000)
+            setTimeout(() => { reject({ message: err.message }) }, 500)
         })
     })
 }
