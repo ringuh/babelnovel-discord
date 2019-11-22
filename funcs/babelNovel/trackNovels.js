@@ -40,7 +40,7 @@ try {
                 check: true,
                 token: novel.token || defaultToken,
                 min: 0,
-                max: 10000,
+                max: process.argv.includes('all') ? 0: 10000,
                 cron: process.argv.includes('all')
             })
             
