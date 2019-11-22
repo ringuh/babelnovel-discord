@@ -37,14 +37,15 @@ try {
             if (json.lastChapter.id === novel.lastChapterBabelId)
                 continue
 
-            await scrapeNovel(null, [novel], {
-                check: true,
-                token: novel.token || defaultToken,
-                min: 0,
-                max: process.argv.includes('all') ? 0: 10000,
-                cron: process.argv.includes('all')
-            })
-            
+            if(novel.trackers.length)
+                await scrapeNovel(null, [novel], {
+                    check: true,
+                    token: novel.token || defaultToken,
+                    min: 0,
+                    max: 10000,
+                    cron: process.argv.includes('all')
+                })
+                
             json.lastChapter.bookCanonicalName = novel.canonicalName
             json.lastChapter.isAnnounced = false;
             chapter = await novel.jsonToChapter(json.lastChapter, true)
