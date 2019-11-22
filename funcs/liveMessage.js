@@ -5,72 +5,84 @@ const { RichEmbed, Attachment } = require('discord.js')
 
 class LiveMessage {
     constructor(message, novel, params) {
-        this.ignore = true
         this.message = message
-        this.novel = novel
-        this.emb = new RichEmbed()
-        this.sent = null
         this.params = params
+        this.novel = Array.isArray(novel) ? novel[0] : novel
+        this.novelCount = Array.isArray(novel) ? novel.length : 1
+        this.author = ''
+        this.sent = null
+        this.description = new Array(5)
     }
 
-    async init(counter, max, novel) {
-        if (novel) this.novel = novel
-
+    getEmbed() {
         const [coverName, coverAttachment] = this.novel.DiscordCover()
-        this.emb.setColor('#0099ff')
-            .attachFile(coverAttachment)
+        return new RichEmbed()
+            .setColor('#0099ff')
+            .setAuthor(this.author)
             .setTitle(this.novel.name)
             .setURL(this.novel.Url())
             .setTimestamp()
+            .attachFile(coverAttachment)
+            .setThumbnail(coverName)
             .setFooter(this.novel.canonicalName, coverName)
-            .setDescription(counter ?
-                `Scraping chapters attempt ${counter} / ${max}` :
-                "Initializing novel"
-            );
+            .setDescription("Initializing novel");
 
-
-        this.ignore = false
-        return await this.send()
     }
 
-    async update() {
-        this.emb.setTitle("updated")
-        return await this.send()
+    async init(counter, max) {
+        let emb = this.getEmbed()
+        if (counter && max) emb.setDescription(`Scraping attempt ${counter} / ${max}`);
+        return await this.send(this.getEmbed())
     }
 
-    async description(str, expire) {
-        this.emb.setDescription(str)
-        return await this.send(expire)
+    async scrapeProgress(counter, novel) {
+        if (!this.message || this.novelCount < 2) return false
+        this.novel = novel
+        this.author = `${counter} / ${this.novelCount}`
+        console.log(novel.name)
+        if (this.sent) {
+            await this.sent.delete().catch(err => console.log(err.message))
+            this.sent = null
+        }
+
+        return await this.send(this.getEmbed())
+    }
+
+    async setDescription(description, expire, line) {
+        let emb = this.getEmbed()
+        if (line >= 0) {
+            this.description[line] = description;
+            description = this.description.filter(d => d).join("\n")
+        }
+        emb.setDescription(description)
+        return await this.send(emb, expire)
     }
 
     async setMax(min, count) {
+        let emb = this.getEmbed()
         this.max = min + count - 1
-        this.emb.setDescription(`Found ${count} chapters`)
-
-        return await this.send()
+        emb.setDescription(`Found ${count} chapters`)
+        return await this.send(emb)
     }
 
     async progress(val) {
-        this.min = val
-        this.emb.setDescription(`Processing ${this.min} / ${this.max}`)
-
-        return await this.send()
+        let emb = this.getEmbed()
+        emb.setDescription(`Processing ${val} / ${this.max}`, null, 0)
+        return await this.send(emb)
     }
 
-    async send(expire) {
-        if (this.ignore) return true
+    async send(message, expire) {
+        if (!this.message) return true
         if (this.sent)
-            return await this.sent.edit(this.emb.setTimestamp())
+            return await this.sent.edit(message.setTimestamp())
                 .then(msg => msg.Expire(this.message, !expire))
-                .catch(err => console.log("!!", err.message))
+                .catch(err => console.log("Sending error:", err.message))
         else
             return await this.message.channel.send(
-                this.emb.setTimestamp()).then(msg => {
+                message.setTimestamp()).then(msg => {
                     this.sent = msg
                     this.sent.Expire(this.message, !expire)
-                }).catch(err => console.log("!!!", err.message))
-        //.setDescription(`${numerics.latest_chapter_limit} latest chapters on https://babelnovel.com/latest-update`)
-        //    .addBlankField()
+                }).catch(err => console.log("Sending error:", err.message))
     }
 
     async attach(files) {

@@ -36,8 +36,8 @@ const scrapeNovels = async (browser, novels, params, livemsg = new LiveMessage()
             // this should never happen
             if (novel.isRemoved && !token) continue
 
-            if (!livemsg.ignore) await livemsg.init(i, novels.length, novel)
-            console.log(green(novel.name), novel.isPay ? '$':'', novel.isRemoved ? 'removed':'', token)
+            await livemsg.scrapeProgress(i, novel)
+            console.log(green(novel.name), novel.isPay ? '$' : '', novel.isRemoved ? 'removed' : '', token)
 
             browser = await launchBrowser(browser)
             page = await browser.newPage();
@@ -74,7 +74,7 @@ const scrapeNovels = async (browser, novels, params, livemsg = new LiveMessage()
                 });
                 if (busy) {
                     console.log(yellow("puppeteer is busy"))
-                    await livemsg.description("Puppeteer is busy")
+                    await livemsg.setDescription("Puppeteer is busy", null, 1)
                     return request.abort("aborted");
                 }
 
@@ -88,14 +88,14 @@ const scrapeNovels = async (browser, novels, params, livemsg = new LiveMessage()
                 return request.continue({ headers });
             });
 
-            await livemsg.description("Fetching cookie")
+            await livemsg.setDescription("Fetching cookie")
             await novel.fetchCookie(page, params)
 
-            await livemsg.description("Listing chapters")
+            await livemsg.setDescription("Listing chapters")
             const chapterList = await novel.scrapeChaptersBulk(page, params)
             console.log(chapterList.length)
             if (!chapterList.length) continue;
-            
+
             const min = params.min > 0 ? (params.min) : 1
             await livemsg.setMax(min, chapterList.length)
 
@@ -123,7 +123,7 @@ const scrapeNovels = async (browser, novels, params, livemsg = new LiveMessage()
         } catch (err) {
             console.log(red(err.message))
             if (page) await page.close()
-            await livemsg.description(err.message)
+            await livemsg.setDescription(err.message)
         }
     }
     await Setting.destroy({ where: { key: "puppeteer_busy", server: reqGroupID } })

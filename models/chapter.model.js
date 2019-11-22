@@ -103,7 +103,7 @@ module.exports = function (sequelize, type) {
         let json = await page.evaluate(() => {
             return JSON.parse(document.querySelector("body").innerText);
         });
-
+        
         if (json.code !== 0) throw { message: "Chapter code is wrong", code: 7 }
 
         json = json.data

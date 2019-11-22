@@ -59,12 +59,14 @@ module.exports = {
                     if (r.code === 5) break
 
                     if (r.code && counter <= max_counter) {
-                        await livemsg.description(`Trying again in ${numerics.retry_seconds / 1000} seconds`)
+                        await livemsg.setDescription(
+                            `Trying again in ${numerics.retry_seconds / 1000} seconds`, null, 1
+                        )
                         await new Promise(resolve => setTimeout(resolve, numerics.retry_seconds))
                     }
                 }
             }
-
+            
             const chapters = await Chapter.findAll({
                 where: {
                     novel_id: novel.id,
@@ -78,21 +80,18 @@ module.exports = {
                 order: [['index', 'asc']]
             })
             if (!chapters.length)
-                return await livemsg.description(
+                return await livemsg.setDescription(
                     "No chapters with content found for this novel\ncheck !listepubs", true
                 )
             if (params.tojson) tojson.execute(message, [novelStr])
-            if (params.noepub) return await livemsg.description("Parse finished. Skipping epub", true)
-            await livemsg.description("Generating epub")
-            if (global.config.generatingEpub)
-                return await livemsg.description("Epub generator in progress. Try again later", true)
-
+            if (params.noepub) return await livemsg.setDescription("Parse finished. Skipping epub", true)
+            await livemsg.setDescription("Generating epub", null, 1)
             let epub = await generateEpub(novel, chapters, params)
 
             return await livemsg.attach(epub, chapters)
         } catch (err) {
             console.log(err)
-            return await livemsg.description(err.message, true)
+            return await livemsg.setDescription(err.message, true)
         }
     },
 

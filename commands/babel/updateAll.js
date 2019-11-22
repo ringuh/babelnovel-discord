@@ -57,7 +57,7 @@ module.exports = {
         let r = false
 
         let [counter, max_counter] = [1, 5]
-        const livemsg = new LiveMessage(message, novels[0], params)
+        const livemsg = new LiveMessage(message, novels, params)
         await livemsg.init()
         try {
             if (isBypass(message)) {
@@ -67,17 +67,17 @@ module.exports = {
                     counter++;
                     if (r.code === 5) break
                     if (r.code && counter <= max_counter) {
-                        await livemsg.description(`Trying again in ${numerics.retry_seconds / 1000} seconds`)
+                        await livemsg.setDescription(`Trying again in ${numerics.retry_seconds / 1000} seconds`, null, 1)
                         await new Promise(resolve => setTimeout(resolve, numerics.retry_seconds))
                     }
                 }
             }
 
-            return await livemsg.description("Parse finished.", true)
+            return await livemsg.setDescription("Parse finished.", true, 1)
 
         } catch (err) {
             console.log(err)
-            return await livemsg.description(err.message, true)
+            return await livemsg.setDescription(err.message, true, 1)
         }
     },
 
