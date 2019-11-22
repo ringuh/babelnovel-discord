@@ -220,8 +220,8 @@ module.exports = function (sequelize, type) {
             try {
                 tmp.cover = await downloadImage(json.data.cover, fn, folder)
             } catch (err) { console.log(red("error", err.message)) }
-
         }
+        else delete json.data.cover
 
 
         await this.update(tmp)
