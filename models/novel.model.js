@@ -219,15 +219,14 @@ module.exports = function (sequelize, type) {
             const fn = `${this.canonicalName}.png`
             try {
                 tmp.cover = await downloadImage(json.data.cover, fn, folder)
-            } catch (err) { console.log(red("error", err.message)) }
+            } catch (err) { 
+                console.log(red("error", err.message)) 
+                delete tmp.cover
+            }
         }
-        else delete json.data.cover
-
-
+        else delete tmp.cover
         await this.update(tmp)
-
         return json.data
-
     }
 
     Model.prototype.scrapeChapters = async function (page) {
