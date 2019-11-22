@@ -31,6 +31,7 @@ try {
 
     for (var i in trackedNovels) {
         try {
+            console.log(i, "/", trackedNovels.length)
             const novel = trackedNovels[i]
             let json = await novel.fetchJson(page)
             if (json.lastChapter.id === novel.lastChapterBabelId)
