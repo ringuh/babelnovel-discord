@@ -1,4 +1,5 @@
 global.config = require('./config.json');
+global.config.db = global.config[global.config.db]
 const { numerics } = global.config
 const { launchBrowser } = require('./funcs/babelNovel')
 const fetchLatest = require('./funcs/babelNovel/fetchLatest')

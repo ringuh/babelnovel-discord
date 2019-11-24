@@ -225,7 +225,7 @@ module.exports = function (sequelize, type) {
             console.log(url)
             await page.waitFor(numerics.puppeteer_delay)
             await page.goto(url)
-            await page.screenshot({ path: "screenshot.tmp.png" })
+            //await page.screenshot({ path: "screenshot.tmp.png" })
             json = await page.evaluate(() => {
                 return JSON.parse(document.querySelector("body").innerText);
             });
