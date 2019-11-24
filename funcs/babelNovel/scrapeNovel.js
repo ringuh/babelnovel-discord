@@ -78,7 +78,10 @@ const scrapeNovels = async (browser, novels, params, livemsg = new LiveMessage()
                     return request.abort("aborted");
                 }
 
-                await page.waitFor(numerics.puppeteer_delay)
+                if (params.cron)
+                    await page.waitFor(numerics.puppeteer_delay * 2)
+                else
+                    await page.waitFor(numerics.puppeteer_delay)
                 console.log(request.url())
                 if (!token) return request.continue();
 
@@ -93,7 +96,7 @@ const scrapeNovels = async (browser, novels, params, livemsg = new LiveMessage()
 
             await livemsg.setDescription("Listing chapters")
             const chapterList = await novel.scrapeChaptersBulk(page, params)
-            
+
             console.log(chapterList.length)
             if (!chapterList.length) continue;
 

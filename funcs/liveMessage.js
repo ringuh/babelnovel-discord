@@ -15,6 +15,7 @@ class LiveMessage {
     }
 
     getEmbed() {
+        if (!this.novel) return new RichEmbed()
         const [coverName, coverAttachment] = this.novel.DiscordCover()
         return new RichEmbed()
             .setColor('#0099ff')
