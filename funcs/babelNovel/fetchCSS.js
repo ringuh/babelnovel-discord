@@ -16,7 +16,7 @@ const fetchCSS = async (page, url) => {
         console.log(magenta("Fetching CSS"))
         await page.goto(url);
         // wait for CSS file to load
-        await page.waitFor(numerics.puppeteer_delay / 2)
+        await page.waitFor(500)
 
         let cssFile = await page.evaluate(() => {
             const cssSelector = "link[href*='content-css']"
@@ -39,7 +39,7 @@ const fetchCSS = async (page, url) => {
             return document.querySelector("body").innerText;
         });
         if (!css) return CSSError('CSS content not found')
-        
+
         return css
 
     } catch (err) {

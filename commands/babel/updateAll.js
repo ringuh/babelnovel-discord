@@ -66,6 +66,11 @@ module.exports = {
                     r = await scrapeNovel(null, novels, params, livemsg)
                     counter++;
                     if (r.code === 5) break
+                    if (r.code === 666) {
+                        return await livemsg.setDescription(
+                            `Your IP should be blocked. Restart server`, null, 1
+                        )
+                    }
                     if (r.code && counter <= max_counter) {
                         await livemsg.setDescription(`Trying again in ${numerics.retry_seconds / 1000} seconds`, null, 1)
                         await new Promise(resolve => setTimeout(resolve, numerics.retry_seconds))
@@ -94,7 +99,7 @@ const handleParameters = async (parameters) => {
         limit: numerics.update_chapter_limit,
         force: parameters.includes("force"),
         token: null,
-        cron: true,
+        cron: false,
         reqGroupID: 'updateChaptersDiscord'
     }
 

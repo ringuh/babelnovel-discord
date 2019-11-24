@@ -43,7 +43,7 @@ try {
                     token: novel.token || defaultToken,
                     min: 0,
                     max: 10000,
-                    cron: process.argv.includes('all')
+                    cron: true
                 })
                 
             json.lastChapter.bookCanonicalName = novel.canonicalName

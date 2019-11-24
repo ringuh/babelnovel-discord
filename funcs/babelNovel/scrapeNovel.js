@@ -1,7 +1,7 @@
 const { numerics, api, strings } = global.config;
 const { launchBrowser } = require('.')
 const { red, green, yellow, magenta, blue } = require('chalk').bold
-const { Novel, TrackNovel, Setting } = require('../../models')
+const { Novel, Chapter, TrackNovel, Setting, Sequelize } = require('../../models')
 const fetchCSS = require('./fetchCSS')
 const LiveMessage = require('../liveMessage')
 
@@ -77,14 +77,13 @@ const scrapeNovels = async (browser, novels, params, livemsg = new LiveMessage()
                     await livemsg.setDescription("Puppeteer is busy", null, 1)
                     return request.abort("aborted");
                 }
-
-                if (params.cron)
-                    await page.waitFor(numerics.puppeteer_delay * 2)
-                else
-                    await page.waitFor(numerics.puppeteer_delay)
-                console.log(request.url())
+                let delay = numerics.puppeteer_delay
+                const url = request.url()
+                if (params.cron) delay *= 2
+                if (!url.includes("/api/")) delay = 500
+                console.log(url, magenta(delay))
+                await page.waitFor(delay)
                 if (!token) return request.continue();
-
                 // Add a new header for navigation request.
                 const headers = request.headers();
                 headers['token'] = token
@@ -92,25 +91,33 @@ const scrapeNovels = async (browser, novels, params, livemsg = new LiveMessage()
             });
 
             await livemsg.setDescription("Fetching cookie")
-            await novel.fetchCookie(page, params)
-
+            const novelUrl = api.novel
+                .replace("/api/", "/")
+                .replace("<book>", novel.canonicalName)
+            //await novel.fetchCookie(page, params)
+            cssHash = cssHash || await fetchCSS(page, novelUrl)
             await livemsg.setDescription("Listing chapters")
             const chapterList = await novel.scrapeChaptersBulk(page, params)
-
-            console.log(chapterList.length)
             if (!chapterList.length) continue;
 
             const min = params.min > 0 ? (params.min) : 1
             await livemsg.setMax(min, chapterList.length)
 
-            const chapterUrl = api.chapter
-                .replace("/api/", "/")
-                .replace("<book>", novel.canonicalName)
-                .replace("<chapterName>", chapterList[0].canonicalName)
-            cssHash = cssHash || await fetchCSS(page, chapterUrl)
-
             let counter = 0;
+
+            const ok_ids = await Chapter.findAll({
+                where: {
+                    novel_id: novel.id,
+                    chapterContent: {
+                        [Sequelize.Op.not]: null
+                    }
+                },
+                attributes: ["babelId"],
+                sort: ["babelId"]
+            }).then(ids => ids.map(id => id.babelId))
+            console.log(ok_ids.length, "/", chapterList.length)
             for (var i in chapterList) {
+                if (ok_ids.includes(chapterList[i].id) && !params.force) continue
                 if (await novel.scrapeContent(page, chapterList[i], cssHash, params)) {
                     await livemsg.progress(min + parseInt(i))
                     // dont scrape unlimited chapters on automated process
