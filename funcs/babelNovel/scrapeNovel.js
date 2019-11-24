@@ -1,4 +1,4 @@
-const { numerics, api } = global.config;
+const { numerics, api, strings } = global.config;
 const { launchBrowser } = require('.')
 const { red, green, yellow, magenta, blue } = require('chalk').bold
 const { Novel, TrackNovel, Setting } = require('../../models')
@@ -47,7 +47,7 @@ const scrapeNovels = async (browser, novels, params, livemsg = new LiveMessage()
                     return request.continue();
 
                 const busy = await Setting.findOrCreate({
-                    where: { key: "puppeteer_busy" },
+                    where: { key: strings.puppeteer_busy },
                     defaults: {
                         server: reqGroupID,
                         value: Date.now()
@@ -128,7 +128,7 @@ const scrapeNovels = async (browser, novels, params, livemsg = new LiveMessage()
                 return err
         }
     }
-    await Setting.destroy({ where: { key: "puppeteer_busy", server: reqGroupID } })
+    await Setting.destroy({ where: { key: strings.puppeteer_busy, server: reqGroupID } })
     if (browser) await browser.close()
     return { code: 0 }
 }

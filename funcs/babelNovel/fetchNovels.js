@@ -1,5 +1,5 @@
 const chalk = require('chalk')
-const { api, numerics } = global.config;
+const { api, numerics, strings } = global.config;
 const { Novel, Setting, TrackNovel } = require('../../models')
 const { red } = chalk.bold
 
@@ -17,7 +17,7 @@ const fetchNovels = async (browser) => {
             // this novel surpasses all other processes
             const timestamp = Date.now()
             await Setting.findOrCreate({
-                where: { key: "puppeteer_busy" },
+                where: { key: strings.puppeteer_busy },
                 defaults: { value: timestamp, server: reqGroupID }
             }).then(async ([setting, created]) => {
                 await setting.update({ value: timestamp, server: reqGroupID })
@@ -65,7 +65,7 @@ const fetchNovels = async (browser) => {
             }
         }
 
-        await Setting.destroy({ where: { key: "puppeteer_busy", server: reqGroupID } })
+        await Setting.destroy({ where: { key: strings.puppeteer_busy, server: reqGroupID } })
         await page.close()
 
     } catch (e) {

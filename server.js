@@ -1,4 +1,5 @@
 global.config = require('./config.json');
+global.config.db = global.config[global.config.db]
 const { prefix, discord_token, bypass_bots, numerics } = global.config;
 Object.keys(global.config.numerics).forEach(k => {
     if (k.endsWith("_seconds")) global.config.numerics[k] *= 1000
