@@ -10,11 +10,12 @@ module.exports = function (sequelize, type) {
             autoIncrement: true,
             primaryKey: true,
         },
-        genre: { // 'fantasy'
-            type: type.STRING,
-            lower: true
-        },
         babelId: {
+            type: type.STRING,
+            unique: true,
+            allowNull: false
+        },
+        canonicalName: { // martial-arts-peak
             type: type.STRING,
             unique: true,
             allowNull: false
@@ -23,8 +24,26 @@ module.exports = function (sequelize, type) {
             type: type.STRING,
             unique: true
         },
+        releasedChapterCount: { // 26
+            type: type.INTEGER
+        },
+        chapterCount: { // 26
+            type: type.INTEGER
+        },
         lastChapterBabelId: {
             type: type.STRING
+        },
+        cover: { // 78c8d251-1812-4927-bbe2-d0d3bcdef976
+            type: type.STRING,
+        },
+        name: { // Martial Arts Peak
+            type: type.STRING,
+        },
+        historyCanonicalName: { // martial-arts-peak
+            type: type.STRING,
+        },
+        alias: {
+            type: type.STRING,
         },
         authorId: { // 78c8d251-1812-4927-bbe2-d0d3bcdef976
             type: type.STRING,
@@ -35,58 +54,15 @@ module.exports = function (sequelize, type) {
         authorEn: { // i eat tomatoes
             type: type.STRING,
         },
-        isCopyrightAuthorized: { // 1
-            type: type.INTEGER,
-        },
-        cover: { // 78c8d251-1812-4927-bbe2-d0d3bcdef976
-            type: type.STRING,
-        },
-        name: { // Martial Arts Peak
-            type: type.STRING,
-        },
-        subTitle: { // His spirit blood and bone were stolen. Luckily, he had mysterious memories.
-            type: type.STRING,
-        },
         synopsis: {
             type: type.TEXT
         },
-        tag: {
+        isCopyrightAuthorized: { // 1
+            type: type.INTEGER,
+        },
+        genre: { // 'fantasy'
             type: type.STRING,
-        },
-        serial: {
-            type: type.STRING,
-        },
-        enSerial: {
-            type: type.STRING,
-        },
-        status: {
-            type: type.INTEGER
-        },
-        alias: {
-            type: type.STRING,
-        },
-        canonicalName: { // martial-arts-peak
-            type: type.STRING,
-            unique: true,
-            allowNull: false
-        },
-        historyCanonicalName: { // martial-arts-peak
-            type: type.STRING,
-        },
-        ratingNum: { // 9.125
-            type: type.DOUBLE
-        },
-        releasedChapterCount: { // 26
-            type: type.INTEGER
-        },
-        chapterCount: { // 26
-            type: type.INTEGER
-        },
-        updateTime: {
-            type: type.DATE
-        },
-        createTime: {
-            type: type.DATE
+            lower: true
         },
         isPay: {
             type: type.BOOLEAN
@@ -112,7 +88,15 @@ module.exports = function (sequelize, type) {
         token: {
             type: type.STRING
         },
-
+        ratingNum: { // 9.125
+            type: type.DOUBLE
+        },
+        updateTime: {
+            type: type.DATE
+        },
+        createTime: {
+            type: type.DATE
+        },
 
 
 

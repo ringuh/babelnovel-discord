@@ -13,7 +13,7 @@ module.exports = {
     description: 'Turns chapter data into json (private)',
     args: "<novel>",
     hidden: true,
-    async execute(message, args, params) {
+    async execute(message, args, params=[]) {
         if (!isBypass(message)) return false
 
         if (args.length < 1) return usageMessage(message, this)
@@ -48,7 +48,6 @@ module.exports = {
 
 
         Zip(novel, chapters).then(async files => {
-            console.log(files)
             for (var i in files) {
                 const file = files[i]
                 await message.channel.send(`!fromjson`, {

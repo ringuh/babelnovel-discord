@@ -105,10 +105,11 @@ module.exports = function (sequelize, type) {
         });
         
         if (json.code !== 0) throw { message: "Chapter code is wrong", code: 7 }
-
+        if (typeof (json.data) == "string")
+            throw { message: json.data, type: "chapter_error", code: 666 }
         json = json.data
         delete json.id
-        
+
         if (json.content &&
             (json.isBorrowed || json.isBought || json.isFree || json.isLimitFree)) {
 
@@ -129,7 +130,7 @@ module.exports = function (sequelize, type) {
 
             json.chapterContent = children.map(n => `<p>${n.trim()}</p>`).join("\n")
         }
-        
+
         delete json.content
         await this.update(json).catch(err => {
             throw { message: `${json.canonicalName} ${err.message}`, type: "chapter_error", code: 6 }
@@ -138,7 +139,7 @@ module.exports = function (sequelize, type) {
 
         if (json.chapterContent || params.ignore)
             return true
-        
+
         throw { message: "Chapter content is missing", type: "chapter_error", code: 6 }
     };
 

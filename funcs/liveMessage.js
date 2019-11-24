@@ -53,6 +53,7 @@ class LiveMessage {
         if (line >= 0) {
             this.description[line] = description;
             description = this.description.filter(d => d).join("\n")
+            console.log(this.description)
         }
         emb.setDescription(description)
         return await this.send(emb, expire)

@@ -55,8 +55,12 @@ module.exports = {
                     await livemsg.init(counter, max_counter)
                     r = await scrapeNovel(null, [novel], params, livemsg)
                     counter++;
-
                     if (r.code === 5) break
+                    if (r.code === 666) {
+                        return await livemsg.setDescription(
+                            `Your IP should be blocked. Restart server`, null, 1
+                        )
+                    }
 
                     if (r.code && counter <= max_counter) {
                         await livemsg.setDescription(
@@ -66,7 +70,7 @@ module.exports = {
                     }
                 }
             }
-            
+
             const chapters = await Chapter.findAll({
                 where: {
                     novel_id: novel.id,
@@ -84,8 +88,8 @@ module.exports = {
                     "No chapters with content found for this novel\ncheck !listepubs", true
                 )
             if (params.tojson) tojson.execute(message, [novelStr])
-            if (params.noepub) return await livemsg.setDescription("Parse finished. Skipping epub", true)
-            await livemsg.setDescription("Generating epub", null, 1)
+            if (params.noepub) return await livemsg.setDescription("Parse finished. Skipping epub", true, 2)
+            return await livemsg.setDescription("Generating epub", null, 1)
             let epub = await generateEpub(novel, chapters, params)
 
             return await livemsg.attach(epub, chapters)

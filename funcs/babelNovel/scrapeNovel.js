@@ -62,7 +62,7 @@ const scrapeNovels = async (browser, novels, params, livemsg = new LiveMessage()
                     }
 
                     const timeSince = Date.now() - setting.updatedAt
-                    const waitFor = 120 * 1000
+                    const waitFor = numerics.puppeteer_busy_seconds
 
                     if (timeSince < waitFor) return true
 
@@ -123,7 +123,9 @@ const scrapeNovels = async (browser, novels, params, livemsg = new LiveMessage()
         } catch (err) {
             console.log(red(err.message))
             if (page) await page.close()
-            await livemsg.setDescription(err.message)
+            await livemsg.setDescription(err.message, null, 0)
+            if (err.code && err.code === 666)
+                return err
         }
     }
     await Setting.destroy({ where: { key: "puppeteer_busy", server: reqGroupID } })
