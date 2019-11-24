@@ -119,6 +119,7 @@ const handleParameters = async (parameters, novelStr, message) => {
         tojson: parameters.includes('tojson'),
         keep: parameters.includes('keep'),
         ignore: parameters.includes('ignore'),
+        reverse: parameters.includes('reverse'),
         token: null,
     }
 

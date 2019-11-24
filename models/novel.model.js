@@ -242,7 +242,7 @@ module.exports = function (sequelize, type) {
         return chapters
     }
 
-    Model.prototype.scrapeChaptersBulk = async function (page, { min, max }) {
+    Model.prototype.scrapeChaptersBulk = async function (page, { min, max, reverse }) {
         if (!page || !this.babelId) return null
 
         console.log(yellow("Listing chapters"))
@@ -272,6 +272,7 @@ module.exports = function (sequelize, type) {
                 c.lastChapter.num >= min && c.lastChapter.num <= max)
                 chapters.push(c.lastChapter)
         }
+        if (reverse) chapters = chapters.reverse()
 
         return chapters
     }
