@@ -89,7 +89,7 @@ module.exports = {
                 )
             if (params.tojson) tojson.execute(message, [novelStr])
             if (params.noepub) return await livemsg.setDescription("Parse finished. Skipping epub", true, 2)
-            return await livemsg.setDescription("Generating epub", null, 1)
+            await livemsg.setDescription("Generating epub", null, 1)
             let epub = await generateEpub(novel, chapters, params)
 
             return await livemsg.attach(epub, chapters)

@@ -17,9 +17,10 @@ const jsonFolder = "static/json"
 
 !(async () => { // chapters
     let json = [1]
-    let [page, limit] = [0, 5000]
+    let [page, limit] = [0, 20000]
     while (json.length) {
         json = await Chapter.findAll({
+            order: ['num'],
             limit: limit,
             offset: page * limit,
             include: [{ model: Novel, as: "novel", attributes: ['babelId'] }]

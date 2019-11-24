@@ -114,7 +114,6 @@ module.exports = function (sequelize, type) {
         if (shortSummary) {
             r.synopsis = r.synopsis ? r.synopsis.substr(0, 100) : null
             r.summary = r.summary ? r.summary.substr(0, 100) : null
-            r.subTitle = r.subTitle ? r.subTitle.substr(0, 100) : null
         }
 
 
