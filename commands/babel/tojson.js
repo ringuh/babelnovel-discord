@@ -13,7 +13,7 @@ module.exports = {
     description: 'Turns chapter data into json (private)',
     args: "<novel>",
     hidden: true,
-    async execute(message, args, params=[]) {
+    async execute(message, args, params = []) {
         if (!isBypass(message)) return false
 
         if (args.length < 1) return usageMessage(message, this)
@@ -46,11 +46,12 @@ module.exports = {
         }).sort((a, b) => a.index - b.index)
 
 
+        const prefix = global.config.db.options.host === 'localhost' ? '!' : ''
 
         Zip(novel, chapters).then(async files => {
             for (var i in files) {
                 const file = files[i]
-                await message.channel.send(`fromjson`, {
+                await message.channel.send(`${prefix}fromjson`, {
                     file: new Discord.Attachment(file.path, file.name)
                 }).then(msg => msg.Expire(message, params.includes("keep")))
                     .catch(err =>

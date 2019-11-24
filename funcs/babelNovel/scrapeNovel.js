@@ -93,6 +93,7 @@ const scrapeNovels = async (browser, novels, params, livemsg = new LiveMessage()
 
             await livemsg.setDescription("Listing chapters")
             const chapterList = await novel.scrapeChaptersBulk(page, params)
+            
             console.log(chapterList.length)
             if (!chapterList.length) continue;
 
