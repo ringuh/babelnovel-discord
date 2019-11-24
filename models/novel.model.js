@@ -1,7 +1,7 @@
 const { api, numerics } = global.config
 const { red, green, yellow, magenta, blue } = require('chalk').bold
 const downloadImage = require('../funcs/downloadImage')
-const urlTool = require('url')
+const fs = require('fs')
 
 module.exports = function (sequelize, type) {
     const Model = sequelize.define('Novel', {
@@ -129,7 +129,7 @@ module.exports = function (sequelize, type) {
     Model.prototype.DiscordCover = function () {
         if (!this.cover) return [null, null]
         if (!this.cover.startsWith("static/")) return [null, null]
-
+        if (!fs.existsSync(this.cover)) return [null, null]
         const coverFile = this.cover.split('/').slice(-1).pop()
         const coverAttachment = `attachment://${coverFile}`
         return [coverAttachment, this.cover]
@@ -202,8 +202,8 @@ module.exports = function (sequelize, type) {
             const fn = `${this.canonicalName}.png`
             try {
                 tmp.cover = await downloadImage(json.data.cover, fn, folder)
-            } catch (err) { 
-                console.log(red("error", err.message)) 
+            } catch (err) {
+                console.log(red("error", err.message))
                 delete tmp.cover
             }
         }

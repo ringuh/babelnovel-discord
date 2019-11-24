@@ -50,7 +50,7 @@ module.exports = {
         Zip(novel, chapters).then(async files => {
             for (var i in files) {
                 const file = files[i]
-                await message.channel.send(`!fromjson`, {
+                await message.channel.send(`fromjson`, {
                     file: new Discord.Attachment(file.path, file.name)
                 }).then(msg => msg.Expire(message, params.includes("keep")))
                     .catch(err =>
