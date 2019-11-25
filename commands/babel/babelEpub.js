@@ -61,7 +61,7 @@ module.exports = {
                             `Your IP should be blocked. Restart server`, null, 1
                         )
                     }
-
+                    console.log(r)
                     if (r.code && counter <= max_counter) {
                         await livemsg.setDescription(
                             `Trying again in ${numerics.retry_seconds / 1000} seconds`, null, 1

@@ -297,7 +297,7 @@ module.exports = function (sequelize, type) {
 
     Model.prototype.scrapeContent = async function (page, chapterJson, cssHash, params) {
         if (!page || !this.babelId) return null
-        console.log("scrapeContent")
+        
         chapterJson = { ...chapterJson, babelId: chapterJson.id }
         delete chapterJson.id
 

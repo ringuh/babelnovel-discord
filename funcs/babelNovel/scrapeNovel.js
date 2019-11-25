@@ -123,11 +123,17 @@ const scrapeNovels = async (browser, novels, params, livemsg = new LiveMessage()
 
             await page.close()
         } catch (err) {
-            console.log(red(err.message))
+            console.log(red(err.message, err.code))
+            const errors = [
+                5, // css hash missing
+                666, // you shall not pass
+            ]
+
             if (page) await page.close()
             await livemsg.setDescription(err.message, null, 0)
-            if (err.code && err.code === 666)
-                return err
+            if (err.code && errors.includes(err.code)) return err
+            if (novels.length == 1)
+                return { ...err, code: err.code ? err.code : 1 }
         }
     }
     await Setting.destroy({ where: { key: strings.puppeteer_busy, server: reqGroupID } })
