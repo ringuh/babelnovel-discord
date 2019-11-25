@@ -51,13 +51,13 @@ module.exports = {
 
         else if (params.includes('be') || params.includes('scrape')) {
             const prefixes = [
-                ["?", ""],
-                [":", "reverse"],
-                ["", ""]
+                ["?", "noepub", false],
+                [":", "reverse noepub", false],
+                ["", "noepub", true]
             ]
-            prefixes.forEach(prefix => {
+            prefixes.forEach(async prefix => {
                 const line = `${prefix[0]}be ${novel.canonicalName} | check ${prefix[1]}`
-                message.channel.send(line);
+                await message.channel.send(line, { code: prefix[2] });
             })
 
 
