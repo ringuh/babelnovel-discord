@@ -7,7 +7,7 @@ const pathTool = require('path')
 
 const generateEpub = async (novel, chapters, params) => {
     let author = [novel.authorEn, novel.author].filter(n => n).join(" | ")
-    let fn = `${novel.canonicalName}_${chapters[0].index}-${chapters[chapters.length - 1].index}`
+    let fn = `${novel.canonicalName}_${chapters.length}_${chapters[0].index}-${chapters[chapters.length - 1].index}`
 
     let path = `./static/epub`
     if (!fs.existsSync(path)) fs.mkdirSync(path)
@@ -48,7 +48,7 @@ const generateEpub = async (novel, chapters, params) => {
                     const splitTo = Math.ceil(fileSizeInMegabytes / 8)
                     const chapterCount = Math.floor(chapters.length / splitTo)
                     let paths = []
-                    
+
                     for (var i = 0; i < splitTo; ++i) {
                         const chaps = chapters.splice(0, (i + 1 < splitTo) ? chapterCount : chapters.length)
                         const p = await generateEpub(novel, chaps, params)

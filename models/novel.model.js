@@ -135,6 +135,22 @@ module.exports = function (sequelize, type) {
         return [coverAttachment, this.cover]
     }
 
+    Model.prototype.chapterIdsWithContent = async function (babelId, params, refresh) {
+        if (params.force) return false
+        if (!this.okChapterIds || !babelId)
+            this.okChapterIds = await sequelize.models.Chapter.findAll({
+                where: {
+                    novel_id: this.id,
+                    chapterContent: {
+                        [sequelize.Sequelize.Op.not]: null
+                    }
+                },
+                attributes: ["babelId"],
+                sort: ["babelId"]
+            }).then(ids => ids.map(id => id.babelId))
+        
+        return this.okChapterIds.includes(babelId)
+    }
 
 
     Model.prototype.jsonToChapter = async function (chapterData, update) {
@@ -179,7 +195,7 @@ module.exports = function (sequelize, type) {
             return null
 
         let tmp = { ...json.data, author: null, id: this.id }
-
+        delete tmp.cover
         if (json.data.author) {
             tmp.author = json.data.author.name || this.author
             tmp.authorEn = json.data.author.enName || this.authorEn
@@ -197,17 +213,18 @@ module.exports = function (sequelize, type) {
         }
 
         const folder = "static/cover"
+        const [coverAttachment, cover] = this.DiscordCover()
 
-        if (!this.cover || !this.cover.startsWith(folder)) {
+
+        if (!cover) {
             const fn = `${this.canonicalName}.png`
             try {
                 tmp.cover = await downloadImage(json.data.cover, fn, folder)
             } catch (err) {
                 console.log(red("error", err.message))
-                delete tmp.cover
             }
         }
-        else delete tmp.cover
+
         await this.update(tmp)
         return json.data
     }
@@ -280,7 +297,7 @@ module.exports = function (sequelize, type) {
 
     Model.prototype.scrapeContent = async function (page, chapterJson, cssHash, params) {
         if (!page || !this.babelId) return null
-
+        console.log("scrapeContent")
         chapterJson = { ...chapterJson, babelId: chapterJson.id }
         delete chapterJson.id
 
@@ -295,11 +312,11 @@ module.exports = function (sequelize, type) {
         }).then(async ([chap, created]) => {
             if (created && this.trackers.length) chapterJson.isAnnounced = false
             return await chap.update(chapterJson)
-        }
-        ).catch(err => console.log("Novel scrapeC", err.message))
+        }).catch(err => console.log("Novel scrapeC", err.message))
 
         if (!chapter.chapterContent || params.force)
             return await chapter.scrapeContent(page, this, cssHash, params);
+        else await this.chapterIdsWithContent(null, params)
 
         return null
     };

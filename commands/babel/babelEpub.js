@@ -85,11 +85,11 @@ module.exports = {
             })
             if (!chapters.length)
                 return await livemsg.setDescription(
-                    "No chapters with content found for this novel\ncheck !listepubs", true
+                    "No chapters with content found for this novel\ncheck !listepubs", true, 1
                 )
             if (params.tojson) tojson.execute(message, [novelStr])
             if (params.noepub) return await livemsg.setDescription("Parse finished. Skipping epub", true, 2)
-            await livemsg.setDescription("Generating epub", null, 1)
+            await livemsg.setDescription("Generating epub", null, 2)
             let epub = await generateEpub(novel, chapters, params)
 
             return await livemsg.attach(epub, chapters)

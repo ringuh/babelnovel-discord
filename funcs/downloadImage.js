@@ -1,9 +1,10 @@
 const axios = require('axios')
 const sharp = require('sharp')
+const { yellow } = require('chalk').bold
 
 async function downloadImage(url, filename, folder) {
     if (!url || !url.startsWith("http")) return null
-    console.log(url)
+    console.log(yellow(url))
     return new Promise(async (resolve, reject) => {
         //url = encodeURI(url)
         const path = `${folder}/${filename}`

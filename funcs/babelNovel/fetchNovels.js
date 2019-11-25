@@ -47,9 +47,10 @@ const fetchNovels = async (browser) => {
                 novelData.babelId = novelData.id
                 novelData.isRemoved = false;
                 delete novelData.id
+                delete novelData.cover
 
                 novelData.genre = novelData.genres.map(genre => genre.name).filter(n => n).join(" | ")
-
+                
                 const novel = await Novel.findOrCreate({
                     where: { babelId: novelData.babelId },
                     defaults: { canonicalName: novelData.canonicalName || Date.now().toString() },

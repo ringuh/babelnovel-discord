@@ -99,25 +99,16 @@ const scrapeNovels = async (browser, novels, params, livemsg = new LiveMessage()
             await livemsg.setDescription("Listing chapters")
             const chapterList = await novel.scrapeChaptersBulk(page, params)
             if (!chapterList.length) continue;
-
+            console.log(chapterList.length)
+            if (chapterList.length > novel.releasedChapterCount)
+                await novel.update({ releasedChapterCount: chapterList.length })
             const min = params.min > 0 ? (params.min) : 1
             await livemsg.setMax(min, chapterList.length)
 
             let counter = 0;
 
-            const ok_ids = await Chapter.findAll({
-                where: {
-                    novel_id: novel.id,
-                    chapterContent: {
-                        [Sequelize.Op.not]: null
-                    }
-                },
-                attributes: ["babelId"],
-                sort: ["babelId"]
-            }).then(ids => ids.map(id => id.babelId))
-            console.log(ok_ids.length, "/", chapterList.length)
             for (var i in chapterList) {
-                if (ok_ids.includes(chapterList[i].id) && !params.force) continue
+                if (await novel.chapterIdsWithContent(chapterList[i].id, params)) continue
                 if (await novel.scrapeContent(page, chapterList[i], cssHash, params)) {
                     await livemsg.progress(min + parseInt(i))
                     // dont scrape unlimited chapters on automated process
