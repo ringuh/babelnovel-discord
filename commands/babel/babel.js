@@ -50,12 +50,14 @@ module.exports = {
         }
 
         else if (params.includes('be') || params.includes('scrape')) {
-            const prefixes = ["!", "?", ".", ":"]
-            const str = `${novel.canonicalName} | noepub revers`
-
+            const prefixes = [
+                ["?", ""],
+                [":", "reverse"],
+                ["", ""]
+            ]
             prefixes.forEach(prefix => {
-                const line = `${prefix}be ${str}`
-                message.channel.send(line, { code: true });
+                const line = `${prefix[0]}be ${novel.canonicalName} | check ${prefix[1]}`
+                message.channel.send(line);
             })
 
 
