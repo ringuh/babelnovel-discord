@@ -51,20 +51,20 @@ module.exports = {
 
         else if (params.includes('be') || params.includes('scrape')) {
             const prefixes = [
-                ["?", "noepub", false],
-                [":", "reverse noepub", false],
-                ["", "noepub", true]
+                ["?", "", false],
+                [":", "reverse", false],
+                ["", "", true]
             ]
+            await message.channel.send(
+                `${novel.name} (${novel.chapters.length} / ${novel.releasedChapterCount})`,
+                { code: true });
             prefixes.forEach(async prefix => {
-                const line = `${prefix[0]}be ${novel.canonicalName} | check ${prefix[1]}`
+                const line = `${prefix[0]}be ${novel.canonicalName} | noepub ${prefix[1]}`
                 await message.channel.send(line, { code: prefix[2] });
             })
 
 
-            return await message.channel.send(
-                `${novel.name} (${novel.chapters.length} / ${novel.releasedChapterCount})`,
-                { code: true });
-
+            return true
         }
 
         //await message.channel.startTyping()

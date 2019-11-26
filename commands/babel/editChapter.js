@@ -99,6 +99,7 @@ const handleParams = (params) => {
 
     let r = {}
     if (params.includes("keep")) r.keep = true
+    if (params.includes("empty")) r.chapterContent = null
     if (params.includes("force")) r.force = true
     if (params.includes("fix")) {
         r.chapterContent = "chapter content is missing"

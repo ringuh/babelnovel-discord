@@ -55,7 +55,7 @@ module.exports = {
                     await livemsg.init(counter, max_counter)
                     r = await scrapeNovel(null, [novel], params, livemsg)
                     counter++;
-                    if (r.code === 5) break
+                    if ([5, 8].includes(r.code)) break
                     if (r.code === 666) {
                         return await livemsg.setDescription(
                             `Your IP should be blocked. Restart server`, null, 1

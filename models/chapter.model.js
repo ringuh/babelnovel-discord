@@ -136,7 +136,10 @@ module.exports = function (sequelize, type) {
             throw { message: `${json.canonicalName} ${err.message}`, type: "chapter_error", code: 6 }
         })
 
+        if (!(json.isBorrowed || json.isBought || json.isFree || json.isLimitFree))
+            throw { message: "Chapter is premium", type: "chapter_premium", code: 8 }
 
+        return true
         if (json.chapterContent || params.ignore)
             return true
 
