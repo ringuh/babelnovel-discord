@@ -17,6 +17,9 @@ module.exports = {
         const role = roleMentions[0] || message.guild.roles.find(r => r.name.toLowerCase() == roleStr.toLowerCase())
         if (!role) return message.channel.send(`Role '${roleStr}' not found`, { code: true });
         if (!userMentions.length) userMentions = [message.member]
+        if (!userMentions.length)
+            return message.channel.send(
+                `Error that shouldn't be possible, but message sender not detected '${message.member}'`, { code: true });
 
         if (role.hasPermission("ADMINISTRATOR"))
             return message.channel.send(`Touching admin roles is forbidden`, { code: true });

@@ -9,8 +9,9 @@ const novelWhere = novelStr => {
     const qr = Sequelize.or(
         { babelId: novelStr.toLowerCase() },
         { abbr: novelStr.toLowerCase() },
-        { name: { [Op.iLike]: `${novelStr}%` } },
-        { canonicalName: novelStr.toLowerCase() }
+        { canonicalName: novelStr.toLowerCase() },
+        { name: novelStr }
+        //{ name: { [Op.iLike]: `${novelStr}%` } }
     )
     return qr
 };
