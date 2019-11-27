@@ -4,8 +4,10 @@ const urlTool = require('url')
 
 
 const CSSError = (msg) => {
-    throw {
-        code: msg.includes(/navigation/i) ? 55 : 5,
+    let timeout = msg.match(/navigation timeout/i)
+    if (msg.match(/net::ERR_ABORTED/i)) timeout = true
+    throw { // net::ERR_ABORTED
+        code: timeout ? 55 : 5,
         type: "css_error",
         message: msg || "css_error"
     }
