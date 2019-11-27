@@ -14,13 +14,16 @@ const { Chapter, Novel, Sequelize } = require('./models')
 
     if (process.argv.includes('latest')) {
         await fetchLatest(browser)
+        if (browser) await browser.close()
     }
     else if (process.argv.includes('novels')) {
         await fetchNovels(browser)
+        if (browser) await browser.close()
     }
 
     else if (process.argv.includes('track')) {
         await trackNovels(browser)
+        if (browser) await browser.close()
     }
 
     else if (process.argv.includes('announce')) {
