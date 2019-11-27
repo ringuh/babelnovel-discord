@@ -62,7 +62,7 @@ module.exports = {
                         )
                     }
                     console.log(r)
-                    if (r.code && counter <= max_counter) {
+                    if (r.code && counter <= max_counter && counter < max_counter) {
                         await livemsg.setDescription(
                             `Trying again in ${numerics.retry_seconds / 1000} seconds`, null, 1
                         )
