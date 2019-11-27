@@ -46,7 +46,7 @@ module.exports = {
         //novel.chapters.forEach(chap => chap.update({chapterContent: chap.chapterContent.replace(/<br\/>/gi, "\n")}))
         let r = false
 
-        let [counter, max_counter] = [1, 2]
+        let [counter, max_counter] = [1, 3]
         const livemsg = new LiveMessage(message, novel, params)
         await livemsg.init()
         try {
@@ -122,6 +122,7 @@ const handleParameters = async (parameters, novelStr, message) => {
         ignore: parameters.includes('ignore'),
         reverse: parameters.includes('reverse'),
         token: null,
+        reqGroupID: Date.now().toString()
     }
 
     let token = parameters.find(p => p.startsWith("token="))
