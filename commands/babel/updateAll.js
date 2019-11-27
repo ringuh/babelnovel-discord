@@ -97,6 +97,7 @@ const handleParameters = async (parameters) => {
         min: 0,
         max: 10000,
         limit: numerics.update_chapter_limit,
+        check: parameters.includes("force") || parameters.includes("check"),
         force: parameters.includes("force"),
         token: null,
         cron: false,

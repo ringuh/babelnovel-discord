@@ -5,7 +5,7 @@ const urlTool = require('url')
 
 const CSSError = (msg) => {
     throw {
-        code: 5,
+        code: msg.includes(/navigation/i) ? 55 : 5,
         type: "css_error",
         message: msg || "css_error"
     }

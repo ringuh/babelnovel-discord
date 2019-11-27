@@ -55,7 +55,7 @@ module.exports = {
                     await livemsg.init(counter, max_counter)
                     r = await scrapeNovel(null, [novel], params, livemsg)
                     counter++;
-                    if ([5, 8].includes(r.code)) break
+                    if ([5, 7, 8].includes(r.code)) break
                     if (r.code === 666) {
                         return await livemsg.setDescription(
                             `Your IP should be blocked. Restart server`, null, 1
@@ -66,6 +66,7 @@ module.exports = {
                         await livemsg.setDescription(
                             `Trying again in ${numerics.retry_seconds / 1000} seconds`, null, 1
                         )
+                        r = null
                         await new Promise(resolve => setTimeout(resolve, numerics.retry_seconds))
                     }
                 }
