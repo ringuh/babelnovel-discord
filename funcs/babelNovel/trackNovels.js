@@ -47,7 +47,7 @@ const trackNovels = async (browser, client) => {
                     })
 
                 json.lastChapter.bookCanonicalName = novel.canonicalName
-                json.lastChapter.isAnnounced = false;
+                //json.lastChapter.isAnnounced = false;
                 chapter = await novel.jsonToChapter(json.lastChapter, true)
                 if (!chapter) continue
             } catch (err) { err => console.log(magenta(err.message)) }
