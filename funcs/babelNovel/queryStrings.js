@@ -10,8 +10,8 @@ const novelWhere = novelStr => {
         { babelId: novelStr.toLowerCase() },
         { abbr: novelStr.toLowerCase() },
         { canonicalName: novelStr.toLowerCase() },
-        { name: novelStr }
-        //{ name: { [Op.iLike]: `${novelStr}%` } }
+        //{ name: novelStr }
+        { name: { [Op.iLike]: `${novelStr}` } }
     )
     return qr
 };
