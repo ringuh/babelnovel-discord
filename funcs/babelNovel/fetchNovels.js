@@ -1,7 +1,7 @@
 const chalk = require('chalk')
 const { api, numerics, strings } = global.config;
 const { Novel, Setting, TrackNovel } = require('../../models')
-const { red } = chalk.bold
+const { red, magenta, yellow, green } = chalk.bold
 
 const fetchNovels = async (browser) => {
     console.log("fetching novels")
@@ -24,8 +24,12 @@ const fetchNovels = async (browser) => {
                 return setting
             });
 
-            await page.waitFor(numerics.puppeteer_delay * 2)
-            console.log(request.url())
+            let delay = numerics.puppeteer_delay
+            const url = request.url()
+            //if (params.cron) delay *= 2
+            if (!url.includes("/api/")) delay = 500
+            await page.waitFor(delay)
+            console.log(url, magenta(delay))
             request.continue();
         });
         // fetch cookie
@@ -35,7 +39,7 @@ const fetchNovels = async (browser) => {
         let json = { code: 0, data: [1] }
         while (json.code === 0 && json.data.length) {
             const fetch_url = api.novels.replace("<pageNr>", pageNr).replace("<pageSize>", 20)
-
+            console.log(green(pageNr))
             await page.goto(fetch_url);
             json = await page.evaluate(() => {
                 return JSON.parse(document.querySelector("body").innerText);
@@ -43,26 +47,32 @@ const fetchNovels = async (browser) => {
             pageNr++;
 
             for (var i in json.data) {
-                const novelData = json.data[i]
-                novelData.babelId = novelData.id
-                novelData.isRemoved = false;
-                delete novelData.id
-                delete novelData.cover
+                try {
+                    const novelData = json.data[i]
+                    novelData.babelId = novelData.id
+                    novelData.isRemoved = false;
+                    delete novelData.id
+                    delete novelData.cover
 
-                novelData.genre = novelData.genres.map(genre => genre.name).filter(n => n).join(" | ")
-                
-                const novel = await Novel.findOrCreate({
-                    where: { babelId: novelData.babelId },
-                    defaults: { canonicalName: novelData.canonicalName || Date.now().toString() },
-                    include: ['trackers']
-                }).then(async ([nov, created]) => {
-                    await nov.jsonToChapter(novelData.lastChapter)
-                    return await nov.update(novelData).then(async n => {
-                        if (created || novelData.releasedChapterCount > 120)
-                            return await nov.fetchJson(page)
-                    })
+                    if (novelData.genres)
+                        novelData.genre = novelData.genres.map(genre => genre.name).filter(n => n).join(" | ")
 
-                }).catch(err => console.log(err))
+                    const novel = await Novel.findOrCreate({
+                        where: { babelId: novelData.babelId },
+                        defaults: { canonicalName: novelData.canonicalName || Date.now().toString() },
+                        include: ['trackers']
+                    }).then(async ([nov, created]) => {
+                        await nov.jsonToChapter(novelData.lastChapter)
+                        return await nov.update(novelData).then(async n => {
+                            if (created || novelData.releasedChapterCount > 120)
+                                return await nov.fetchJson(page)
+                        })
+
+                    }).catch(err => console.log(err))
+                } catch (err) {
+                    console.log(jsonData[i])
+                    console.log(yellow(err.message))
+                }
             }
         }
 
