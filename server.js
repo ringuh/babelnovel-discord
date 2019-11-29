@@ -7,7 +7,7 @@ Object.keys(global.config.numerics).forEach(k => {
     else if (k.endsWith("_hours")) global.config.numerics[k] *= 60 * 60 * 1000
     else if (k.endsWith("_days")) global.config.numerics[k] *= 24 * 60 * 60 * 1000
 })
-
+const { launchBrowser } = require('./funcs/babelNovel')
 const { Client, Collection, Message } = require('discord.js');
 const fs = require('fs');
 const path = require('path')
@@ -44,10 +44,11 @@ const loadCommands = (fPath) => {
 };
 loadCommands(path.join(__dirname, "commands"))
 
-client.once('ready', () => {
+client.once('ready', async () => {
     console.log('Discord bot running!');
     const commandJs = require('./commands/commands')
     client.user.setActivity(`${prefix}${commandJs.name[0]}`, { type: "LISTENING" });
+    await launchBrowser()
 });
 
 client.on('message', message => {
@@ -84,6 +85,6 @@ client.on('message', message => {
     }
 });
 
-client.login(discord_token);
+client.login(discord_token).catch(err => console.log(err.message))
 
 

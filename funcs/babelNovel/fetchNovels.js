@@ -39,7 +39,7 @@ const fetchNovels = async (browser) => {
         let json = { code: 0, data: [1] }
         while (json.code === 0 && json.data.length) {
             const fetch_url = api.novels.replace("<pageNr>", pageNr).replace("<pageSize>", 20)
-            console.log(green(pageNr))
+            console.log(green("page", pageNr))
             await page.goto(fetch_url);
             json = await page.evaluate(() => {
                 return JSON.parse(document.querySelector("body").innerText);

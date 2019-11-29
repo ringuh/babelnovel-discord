@@ -5,7 +5,7 @@ const { Novel, Chapter, TrackNovel, Setting, Sequelize } = require('../../models
 const fetchCSS = require('./fetchCSS')
 const LiveMessage = require('../liveMessage')
 
-const scrapeNovels = async (browser, novels, params, livemsg = new LiveMessage()) => {
+const scrapeNovels = async (novels, params, livemsg = new LiveMessage()) => {
     const reqGroupID = `${params.reqGroupID || Date.now()}`
     console.log(blue("Scraping novels:", novels.length))
 
@@ -39,7 +39,7 @@ const scrapeNovels = async (browser, novels, params, livemsg = new LiveMessage()
             await livemsg.scrapeProgress(i, novel)
             console.log(green(novel.name), novel.isPay ? '$' : '', novel.isRemoved ? 'removed' : '', token)
 
-            browser = await launchBrowser(browser)
+            const browser = await launchBrowser()
             page = await browser.newPage();
             await page.setRequestInterception(true);
             page.on('request', async request => {
@@ -137,7 +137,7 @@ const scrapeNovels = async (browser, novels, params, livemsg = new LiveMessage()
         }
     }
     await Setting.destroy({ where: { key: strings.puppeteer_busy, server: reqGroupID } })
-    if (browser) await browser.close()
+    //if (browser) await browser.close()
     return { code: 0 }
 }
 

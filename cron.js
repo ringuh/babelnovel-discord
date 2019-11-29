@@ -14,16 +14,16 @@ const { Chapter, Novel, Sequelize } = require('./models')
 
     if (process.argv.includes('latest')) {
         await fetchLatest(browser)
-        if (browser) await browser.close()
+        //if (browser) await browser.close()
     }
     else if (process.argv.includes('novels')) {
         await fetchNovels(browser)
-        if (browser) await browser.close()
+        //if (browser) await browser.close()
     }
 
     else if (process.argv.includes('track')) {
         await trackNovels(browser)
-        if (browser) await browser.close()
+        
     }
 
     else if (process.argv.includes('announce')) {
@@ -66,6 +66,7 @@ const { Chapter, Novel, Sequelize } = require('./models')
 
         await scrapeNovels(browser, novels, params)
     }
-
-    await browser.close()
+    if (browser) await browser.disconnect()
+    process.exit()
+    //await browser.close()
 })();

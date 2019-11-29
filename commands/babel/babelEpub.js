@@ -53,7 +53,7 @@ module.exports = {
             if (isBypass(message) && params.check) {
                 while (!r && counter <= max_counter) {
                     await livemsg.init(counter, max_counter)
-                    r = await scrapeNovel(null, [novel], params, livemsg)
+                    r = await scrapeNovel([novel], params, livemsg)
                     counter++;
                     if ([5, 7, 8].includes(r.code)) break
                     if (r.code === 666) {

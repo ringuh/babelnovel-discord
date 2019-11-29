@@ -38,7 +38,7 @@ const trackNovels = async (browser, client) => {
                     continue
 
                 if (novel.trackers.length)
-                    await scrapeNovel(null, [novel], {
+                    await scrapeNovel([novel], {
                         check: true,
                         token: novel.token || defaultToken,
                         min: 0,
