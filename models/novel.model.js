@@ -208,7 +208,7 @@ module.exports = function (sequelize, type) {
             tmp.isPay = false
 
         if (json.data.isShowStrategy) {
-            //json.data.isRemoved = true
+            json.data.isRemoved = true
             console.log(json.data.bookStrategy.strategy)
         }
 

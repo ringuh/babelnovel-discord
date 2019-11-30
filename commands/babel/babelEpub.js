@@ -46,22 +46,23 @@ module.exports = {
         //novel.chapters.forEach(chap => chap.update({chapterContent: chap.chapterContent.replace(/<br\/>/gi, "\n")}))
         let r = false
 
-        let [counter, max_counter] = [1, 3]
+        let [counter, max_counter] = [0, 3]
         const livemsg = new LiveMessage(message, novel, params)
         await livemsg.init()
         try {
             if (isBypass(message) && params.check) {
                 while (!r && counter <= max_counter) {
+                    counter++;
                     await livemsg.init(counter, max_counter)
                     r = await scrapeNovel([novel], params, livemsg)
-                    counter++;
+                    
                     if ([5, 7, 8].includes(r.code)) break
                     if (r.code === 666) {
                         return await livemsg.setDescription(
                             `Your IP should be blocked. Restart server`, null, 1
                         )
                     }
-                    console.log(r)
+                    
                     if (r.code && counter <= max_counter && counter < max_counter) {
                         await livemsg.setDescription(
                             `Trying again in ${numerics.retry_seconds / 1000} seconds`, null, 1

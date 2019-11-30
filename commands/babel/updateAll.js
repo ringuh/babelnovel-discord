@@ -34,7 +34,9 @@ module.exports = {
 
         const novel_ids = await Chapter.findAll(queryStr).then(chapters =>
             chapters.filter(c =>
-                c.dataValues.count > params.limit && (!params.greed || c.novel.token == "greed")
+                c.dataValues.count > params.limit 
+                && c.dataValues.count < params.cap_limit
+                && (!params.greed || c.novel.token == "greed")
             ).map(c => c.novel.id)
         )
 
@@ -97,6 +99,7 @@ const handleParameters = async (parameters) => {
         min: 0,
         max: 10000,
         limit: numerics.update_chapter_limit,
+        cap_limit: 10000,
         check: parameters.includes("force") || parameters.includes("check"),
         force: parameters.includes("force"),
         token: null,
@@ -106,6 +109,8 @@ const handleParameters = async (parameters) => {
 
     let limit = parameters.find(p => p.startsWith("limit="))
     params.limit = limit ? parseInt(limit.split("=")[1]) : params.limit
+    if(params.limit < numerics.update_chapter_limit)
+        params.cap_limit = numerics.update_chapter_limit
 
     let token = parameters.find(p => p.startsWith("token="))
     if (!token && parameters.includes('token')) params.token = "rinku"
