@@ -10,6 +10,7 @@ const trackNovels = require('./funcs/babelNovel/trackNovels')
 const { Chapter, Novel, Sequelize } = require('./models')
 
 !(async () => {
+    console.log(new Date(), process.argv)
     const browser = await launchBrowser()
 
     if (process.argv.includes('latest')) {

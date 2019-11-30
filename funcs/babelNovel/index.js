@@ -3,7 +3,7 @@ const { strings } = global.config
 const { Setting } = require('../../models')
 const { green, red, yellow, magenta } = require('chalk').bold
 let browser = null;
-const launchBrowser = async () => {
+const launchBrowser = async (allow) => {
     if (browser && browser.isConnected())
         return browser
     console.log("opening new browser")
@@ -24,6 +24,7 @@ const launchBrowser = async () => {
     } catch (err) {
         //console.log("Browser browserWSEndpoint error:", red(err.message))
     }
+    if (!allow) throw { code: 99, message: "Not allowed to open new browser" }
 
     let chrome_args = ['--mute-audio', '--disable-setuid-sandbox']
     if (global.config.debian)
@@ -47,5 +48,14 @@ const launchBrowser = async () => {
     return browser
 }
 
-module.exports = { launchBrowser }
+const checkBrowser = async () => {
+    if (browser && browser.isConnected())
+        return true
+    if (browser && !browser.isConnected())
+        await browser.close()
+
+    await launchBrowser(true)
+}
+
+module.exports = { launchBrowser, checkBrowser }
 
