@@ -109,7 +109,7 @@ const scrapeNovels = async (novels, params, livemsg = new LiveMessage()) => {
             if (params.hop) {
                 await novel.chapterIdsWithContent(null, params)
                 const Hop = (hopList) => {
-                    
+
                     // randomize direction for this instance
                     const reverse = Math.floor(Math.random() * 2)
                     let list = [...reverse ? hopList.reverse() : hopList]
@@ -144,7 +144,7 @@ const scrapeNovels = async (novels, params, livemsg = new LiveMessage()) => {
 
                 };
                 let list = Hop(chapterList)
-                
+
                 let okChaptersCount = novel.okChapterIds.length
                 let i = 0
                 while (i < list.length) {
@@ -153,10 +153,13 @@ const scrapeNovels = async (novels, params, livemsg = new LiveMessage()) => {
                         list = Hop(chapterList)
                         i = 0;
                     }
-                    
                     if (await novel.scrapeContent(page, list[i], cssHash, params))
                         await livemsg.progress(min + parseInt(i), list[i].canonicalName)
                     i++;
+                    if (i === list.length) {
+                        list = Hop(chapterList)
+                        i = 0;
+                    }
                 }
             } else {
                 let counter = 0;
