@@ -68,9 +68,9 @@ class LiveMessage {
         return await this.send(emb)
     }
 
-    async progress(val) {
+    async progress(val, name='chapter') {
         let emb = this.getEmbed()
-        emb.setDescription(`Processing ${val} / ${this.max}`, null, 0)
+        emb.setDescription(`Processing ${val} / ${this.max} (${name})`, null, 0)
         return await this.send(emb)
     }
 

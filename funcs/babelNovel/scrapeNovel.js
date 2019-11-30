@@ -139,7 +139,7 @@ const scrapeNovels = async (novels, params, livemsg = new LiveMessage()) => {
 
                     list = list.filter((c, index) => first.prevEmpty.includes(index))
                         .sort((a, b) => !reverse ? b.num - a.num : a.num - b.num)
-
+                    livemsg.setMax(0, list.length)
                     return list
 
                 };
@@ -155,7 +155,7 @@ const scrapeNovels = async (novels, params, livemsg = new LiveMessage()) => {
                     }
                     
                     if (await novel.scrapeContent(page, list[i], cssHash, params))
-                        await livemsg.progress(min + parseInt(i))
+                        await livemsg.progress(min + parseInt(i), list[i].canonicalName)
                     i++;
                 }
             } else {
@@ -163,7 +163,7 @@ const scrapeNovels = async (novels, params, livemsg = new LiveMessage()) => {
                 for (var i in chapterList) {
                     if (await novel.chapterIdsWithContent(chapterList[i].id, params)) continue
                     if (await novel.scrapeContent(page, chapterList[i], cssHash, params)) {
-                        await livemsg.progress(min + parseInt(i))
+                        await livemsg.progress(min + parseInt(i), chapterList[i].canonicalName)
                         // dont scrape unlimited chapters on automated process
                         if (params.cron) {
                             counter++;
