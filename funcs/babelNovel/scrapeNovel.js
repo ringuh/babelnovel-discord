@@ -105,21 +105,77 @@ const scrapeNovels = async (novels, params, livemsg = new LiveMessage()) => {
             const min = params.min > 0 ? (params.min) : 1
             await livemsg.setMax(min, chapterList.length)
 
-            let counter = 0;
+            // hop tries to find longest empty sequence and start scraping from there
+            if (params.hop) {
+                await novel.chapterIdsWithContent(null, params)
+                const Hop = (hopList) => {
+                    
+                    // randomize direction for this instance
+                    const reverse = Math.floor(Math.random() * 2)
+                    let list = [...reverse ? hopList.reverse() : hopList]
+                    let prevEmpty = []
+                    let first = { prevEmpty: [] }
+                    list = list.map((c, index) => {
+                        if (novel.okChapterIds.includes(c.id)) {
+                            prevEmpty = []
+                            c.prevEmpty = prevEmpty;
+                        } else {
+                            c.prevEmpty = prevEmpty
+                            prevEmpty.push(index)
+                            if (c.prevEmpty.length > first.prevEmpty.length)
+                                first = { ...c };
+                        }
+                        return c
+                    })
 
-            for (var i in chapterList) {
-                if (await novel.chapterIdsWithContent(chapterList[i].id, params)) continue
-                if (await novel.scrapeContent(page, chapterList[i], cssHash, params)) {
-                    await livemsg.progress(min + parseInt(i))
-                    // dont scrape unlimited chapters on automated process
-                    if (params.cron) {
-                        counter++;
-                        if (counter >= numerics.cron_chapters)
-                            break
+                    if (!first.prevEmpty.length) return []
+                    /* console.log(
+                        reverse ? 'reverse order' : 'same order',
+                        list[first.prevEmpty[0]].canonicalName,
+                        list[first.prevEmpty[first.prevEmpty.length - 1]].canonicalName) */
+
+                    const divider = Math.ceil(first.prevEmpty.length / 2)
+                    first.prevEmpty = first.prevEmpty.filter((i, index) => index <= divider)
+
+                    list = list.filter((c, index) => first.prevEmpty.includes(index))
+                        .sort((a, b) => !reverse ? b.num - a.num : a.num - b.num)
+
+                    return list
+
+                };
+                let list = Hop(chapterList)
+                
+                let okChaptersCount = novel.okChapterIds.length
+                let i = 0
+                while (i < list.length) {
+                    if (novel.okChapterIds.length !== okChaptersCount) {
+                        okChaptersCount = novel.okChapterIds.length
+                        list = Hop(chapterList)
+                        i = 0;
                     }
+                    
+                    if (await novel.scrapeContent(page, list[i], cssHash, params))
+                        await livemsg.progress(min + parseInt(i))
+                    i++;
                 }
+            } else {
+                let counter = 0;
+                for (var i in chapterList) {
+                    if (await novel.chapterIdsWithContent(chapterList[i].id, params)) continue
+                    if (await novel.scrapeContent(page, chapterList[i], cssHash, params)) {
+                        await livemsg.progress(min + parseInt(i))
+                        // dont scrape unlimited chapters on automated process
+                        if (params.cron) {
+                            counter++;
+                            if (counter >= numerics.cron_chapters)
+                                break
+                        }
+                    }
 
+                }
             }
+
+
 
             await page.close()
         } catch (err) {

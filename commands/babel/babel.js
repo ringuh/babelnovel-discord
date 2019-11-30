@@ -1,5 +1,6 @@
 
 const { usageMessage } = require('../../funcs/commandTools')
+const Babelepub = require('./babelEpub')
 const { Novel, Chapter, Sequelize } = require("../../models")
 const { novelWhere } = require("../../funcs/babelNovel/queryStrings")
 const { RichEmbed } = require('discord.js')
@@ -53,7 +54,7 @@ module.exports = {
             const prefixes = [
                 ["?", "", false],
                 [":", "reverse", false],
-                ["", "", true]
+                ["\t", "hop", true]
             ]
             await message.channel.send(
                 `${novel.name} (${novel.chapters.length} / ${novel.releasedChapterCount})`,
@@ -63,8 +64,7 @@ module.exports = {
                 await message.channel.send(line, { code: prefix[2] });
             })
 
-
-            return true
+            return await Babelepub.execute(message, [novel.canonicalName], ['noepub', 'hop'])
         }
 
         //await message.channel.startTyping()

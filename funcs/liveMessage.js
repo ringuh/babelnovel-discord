@@ -40,6 +40,7 @@ class LiveMessage {
         if (!this.message || this.novelCount < 2) return false
         this.novel = novel
         this.author = `${counter} / ${this.novelCount}`
+        this.description[0] = null
         console.log(novel.name)
         if (this.sent) {
             await this.sent.delete().catch(err => console.log(err.message))

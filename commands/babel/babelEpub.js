@@ -114,6 +114,7 @@ const handleParameters = async (parameters, novelStr, message) => {
         check: parameters.includes('check') ||
             parameters.includes("noepub") ||
             parameters.includes("force") ||
+            parameters.includes('reverse') ||
             parameters.includes('tojson'),
         epub: parameters.includes('epub') || parameters.includes("force"),
         noepub: parameters.includes('noepub') || parameters.includes('tojson'),
@@ -121,6 +122,7 @@ const handleParameters = async (parameters, novelStr, message) => {
         keep: parameters.includes('keep'),
         ignore: parameters.includes('ignore'),
         reverse: parameters.includes('reverse'),
+        hop: parameters.includes('hop'),
         token: null,
         reqGroupID: Date.now().toString()
     }
