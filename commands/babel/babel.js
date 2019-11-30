@@ -58,7 +58,7 @@ module.exports = {
             ]
             await message.channel.send(
                 `${novel.name} (${novel.chapters.length} / ${novel.releasedChapterCount})`,
-                { code: true });
+                { code: true }).then(msg => msg.Expire(this.message))
             prefixes.forEach(async prefix => {
                 const line = `${prefix[0]}be ${novel.canonicalName} | noepub ${prefix[1]}`
                 await message.channel.send(line, { code: prefix[2] });
