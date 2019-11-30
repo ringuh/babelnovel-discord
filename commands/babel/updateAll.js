@@ -34,8 +34,8 @@ module.exports = {
 
         const novel_ids = await Chapter.findAll(queryStr).then(chapters =>
             chapters.filter(c =>
-                c.dataValues.count > params.limit 
-                && c.dataValues.count < params.cap_limit
+                c.dataValues.count >= params.limit 
+                && c.dataValues.count <= params.cap_limit
                 && (!params.greed || c.novel.token == "greed")
             ).map(c => c.novel.id)
         )

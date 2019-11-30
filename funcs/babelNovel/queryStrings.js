@@ -5,7 +5,7 @@ const novelWhere = novelStr => {
     const rgxp = /babelnovel.com\/books\/(?<canonical>[\w-]{1,})/i
     const match = novelStr.match(rgxp)
     if (match) novelStr = match.groups.canonical
-
+    
     const qr = Sequelize.or(
         { babelId: novelStr.toLowerCase() },
         { abbr: novelStr.toLowerCase() },

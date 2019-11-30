@@ -13,7 +13,10 @@ const Announce = async (client, chapters) => {
                 const announcement = chapter.novel.trackers[j]
                 // lets send a message
                 const guild = await client.guilds.get(announcement.server)
-                if (!guild) return console.log(`Guild not found ${announcement.server}`)
+                if (!guild) {
+                    console.log(`Guild not found ${announcement.server}`)
+                    continue;
+                }
 
                 if (!announcement.channels) {
                     const setting = default_channels.find(s => s.server === announcement.server)
@@ -37,44 +40,46 @@ const Announce = async (client, chapters) => {
                     await channel.send(`${chapter_url} ${roleSpam}`).catch(err => console.log(err.message))
                 }
             }
-            
+
             await chapter.update({ isAnnounced: true }).catch(err => console.log(err.message))
         } catch (e) {
             console.log(red(e.message))
         }
     }
-    
+
     await client.destroy()
 }
 
 
-const announceNovels = async () => {
-    const chapters = await Chapter.findAll({
-        where: { isAnnounced: false },
-        order: [['index', "asc"], ['num', 'asc']],
-        limit: 20,
-        include: [{
-            model: Novel,
-            as: 'novel',
-            required: true,
-            include: [
-                { model: TrackNovel, as: 'trackers', required: true }
-            ]
-        }]
+const announceNovels = () => {
+    return new Promise(async (resolve, reject) => {
+        const chapters = await Chapter.findAll({
+            where: { isAnnounced: false },
+            order: [['index', "asc"], ['num', 'asc']],
+            limit: 20,
+            include: [{
+                model: Novel,
+                as: 'novel',
+                required: true,
+                include: [
+                    { model: TrackNovel, as: 'trackers', required: true }
+                ]
+            }]
+        })
+        console.log("Chapters waiting for announcement", chapters.length)
+        if (!chapters.length) return false
+
+        const client = new Client();
+
+        client.once('ready', async () => {
+            console.log('Announce running!');
+            await Announce(client, chapters)
+            resolve();
+        });
+
+        client.login(discord_token).catch(err => reject())
+
     })
-    console.log("Chapters waiting for announcement", chapters.length)
-    if (!chapters.length) return false
-
-    const client = new Client();
-
-    client.once('ready', async () => {
-        console.log('Announce running!');
-        await Announce(client, chapters)
-    });
-
-    client.login(discord_token);
-
-
 }
 
 
