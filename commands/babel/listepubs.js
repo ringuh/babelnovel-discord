@@ -68,8 +68,8 @@ module.exports = {
                 `!babelepub nine star hegemon body arts 100-200`
 
             let toFile = [
-                "<html><header><style>",
-                "body { margin: 0.5em }",
+                "<html><head><style>",
+                "body > div { margin: 1em auto; width: 90% }",
                 "li { margin-bottom: 0.5em }",
                 "button { margin-left: 0.5em }",
                 "span { font-size: 80% }",
@@ -84,7 +84,7 @@ module.exports = {
                 }`,
                 "</script>",
                 `<title>Babelnovel epubs (${novels.length})</title>`,
-                "</header><body>",
+                "</head><body><div>",
                 `<h3>Babelnovel epubs (${novels.length})<h3>`,
                 "<ol>",
             ];
@@ -101,10 +101,10 @@ module.exports = {
                 const line = `!babelepub ${novel.canonicalName}`
                 toFile.push(`<li><a href='${novel.url}'>${novel.name} - ${novel.count}</a> ` +
                     ` <button onClick="copy('${line}')"> copy </button>` +
-                    `<br>${line}<br><span>${authLine}</span></li>`)
+                    `<br><code>${line}</code><br><span>${authLine}</span></li>`)
             }
 
-            toFile.push("</ol>", "</body>", "</em>")
+            toFile.push("</ol>", "</div>", "</body>", "</em>")
 
             const fName = `babelepub_${novels.length}.html`
             const fPath = `static/${fName}`
