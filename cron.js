@@ -27,10 +27,10 @@ const { Chapter, Novel, Sequelize } = require('./models')
     else if (process.argv.includes('track')) {
         browser = await launchBrowser()
         await trackNovels(browser)
-        setTimeout(async () => {
-            process.exit()
-        }, 170 * 1000)
-
+        if (!process.argv.includes('all'))
+            setTimeout(async () => {
+                process.exit()
+            }, 170 * 1000)
     }
 
     else if (process.argv.includes('announce')) {
