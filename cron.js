@@ -11,20 +11,26 @@ const { Chapter, Novel, Sequelize } = require('./models')
 
 !(async () => {
     console.log(new Date(), process.argv)
-    const browser = await launchBrowser()
+    let browser = null;
 
     if (process.argv.includes('latest')) {
+        browser = await launchBrowser()
         await fetchLatest(browser)
         //if (browser) await browser.close()
     }
     else if (process.argv.includes('novels')) {
+        browser = await launchBrowser()
         await fetchNovels(browser)
         //if (browser) await browser.close()
     }
 
     else if (process.argv.includes('track')) {
+        browser = await launchBrowser()
         await trackNovels(browser)
-        
+        setTimeout(async () => {
+            process.exit()
+        }, 170 * 1000)
+
     }
 
     else if (process.argv.includes('announce')) {
@@ -64,7 +70,7 @@ const { Chapter, Novel, Sequelize } = require('./models')
             include: ['trackers'],
             order: ['canonicalName']
         });
-
+        browser = await launchBrowser()
         await scrapeNovels(browser, novels, params)
     }
     if (browser) await browser.disconnect()

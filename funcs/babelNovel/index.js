@@ -6,7 +6,7 @@ let browser = null;
 const launchBrowser = async (allow) => {
     if (browser && browser.isConnected())
         return browser
-    console.log("opening new browser")
+    
     const setting_key = `${strings.puppeteer_busy}_browser`;
 
     try {
