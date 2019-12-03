@@ -72,6 +72,7 @@ module.exports = {
                 "body > div { margin: 1em auto; width: 90% }",
                 "li { margin-bottom: 0.5em }",
                 "button { margin-left: 0.5em }",
+                "code { display: block; margin: 0.75em auto }",
                 "span { font-size: 80% }",
                 "</style>",
                 "<script>",
@@ -101,7 +102,7 @@ module.exports = {
                 const line = `!babelepub ${novel.canonicalName}`
                 toFile.push(`<li><a href='${novel.url}'>${novel.name} - ${novel.count}</a> ` +
                     ` <button onClick="copy('${line}')"> copy </button>` +
-                    `<br><code>${line}</code><br><span>${authLine}</span></li>`)
+                    `<br><span>${authLine}</span><code>${line}</code></li>`)
             }
 
             toFile.push("</ol>", "</div>", "</body>", "</em>")

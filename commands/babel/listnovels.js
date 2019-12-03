@@ -56,6 +56,8 @@ module.exports = {
                 "body { margin: 0.5em }",
                 "li { margin-bottom: 0.5em }",
                 "button { margin-left: 0.5em }",
+                "red { color: red }",
+                "yellow { color: darkorange }",
                 "span { font-size: 80% }",
                 "</style>",
                 `<title>Babelnovel ${novelStr} novels (${novels.length})</title>`,
@@ -70,7 +72,8 @@ module.exports = {
 
             for (var i = 0; i < novels.length; ++i) {
                 const novel = novels[i];
-
+                novel.epubs = epub_count.find(n => n.novel_id === novel.id) || { count: 0 }
+                let scrape = novel.releasedChapterCount - novel.epubs.count > 200
                 let authLine = [
                     novel.abbr,
                     novel.isPay ? 'premium' : null,
@@ -79,18 +82,19 @@ module.exports = {
                     novel.isCompleted ? 'completed' : null
                 ].filter(l => l).join(" | ")
 
-                novel.epubs = epub_count.find(n => n.novel_id === novel.id)
-                let epubline = novel.epubs ?
-                    `<br><span>epub: ${novel.epubs.count}</span>` : ''
-                novel.chapters = novel.chapters || []
-                let parsed = ''// novel.chapters.length
-                //parsed = parsed ? `(epub: ${parsed} chapters)` : ''
-                const header = `${novel.name} - ${novel.releasedChapterCount} ${parsed}`
+
+
+                let epubline = novel.epubs.count ? `epub: ${novel.epubs.count}` : '';
+                if (novel.epubs.count && novel.releasedChapterCount - novel.epubs.count > 20)
+                    epubline = `<yellow>${epubline}</yellow>`
+
+                let scrapeMsg = scrape ? '<red>+++</red>' : ''
+                const header = `${novel.name} - ${novel.releasedChapterCount}`
                 const url = novel.Url()
                 //toFile.push(`${i + 1}. [${header}](${url})`)
-                toFile.push(`<li><a href='${url}'>${header}</a>` +
-                    epubline +
-                    `<br><span>${authLine}</span>` +
+                toFile.push(`<li><a href='${url}'>${header}</a> ${scrapeMsg}` +
+                    `<div>${epubline}</div>` +
+                    `<div>${authLine}</div>` +
                     `</li>`)
 
                 if (i < numerics.latest_chapter_limit)
