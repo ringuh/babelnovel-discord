@@ -18,16 +18,29 @@ const trackNovels = async (browser, client) => {
     try {
         const page = await browser.newPage();
         // fetch cookie
-        await page.goto("https://babelnovel.com/search");
+
 
         await page.setRequestInterception(true);
         page.on('request', async request => {
-            if (!request.isNavigationRequest())
+            if (!request.isNavigationRequest()) {
+                if (["google-analytics.com/",
+                    "doubleclick.net/",
+                    "ads/ga-audiences",
+                    "/book_images/",
+                    "data:image"].some(str => request.url().includes(str)))
+                    return request.abort()
+                if (request.url().includes("/api/"))
+                    console.log(magenta(request.url()))
+                else
+                    console.log(request.url())
                 return request.continue();
+            }
+
             await page.waitFor(numerics.puppeteer_delay * 3)
             console.log(request.url())
             return request.continue();
         });
+        await page.goto("https://babelnovel.com/search");
 
         for (var i in trackedNovels) {
             try {

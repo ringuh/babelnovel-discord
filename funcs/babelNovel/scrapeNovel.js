@@ -43,8 +43,12 @@ const scrapeNovels = async (novels, params, livemsg = new LiveMessage()) => {
             page = await browser.newPage();
             await page.setRequestInterception(true);
             page.on('request', async request => {
-                if (!request.isNavigationRequest())
+                if (!request.isNavigationRequest()) {
+                    if (global.config.bad_requests &&
+                        global.config.bad_requests.some(str => request.url().includes(str)))
+                        return request.abort()
                     return request.continue();
+                }
 
                 const busy = await Setting.findOrCreate({
                     where: { key: strings.puppeteer_busy },
