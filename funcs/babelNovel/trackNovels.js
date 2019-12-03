@@ -23,16 +23,9 @@ const trackNovels = async (browser, client) => {
         await page.setRequestInterception(true);
         page.on('request', async request => {
             if (!request.isNavigationRequest()) {
-                if (["google-analytics.com/",
-                    "doubleclick.net/",
-                    "ads/ga-audiences",
-                    "/book_images/",
-                    "data:image"].some(str => request.url().includes(str)))
+                if (global.config.bad_requests &&
+                    global.config.bad_requests.some(str => request.url().includes(str)))
                     return request.abort()
-                if (request.url().includes("/api/"))
-                    console.log(magenta(request.url()))
-                else
-                    console.log(request.url())
                 return request.continue();
             }
 
