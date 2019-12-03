@@ -64,6 +64,8 @@ const fetchNovels = async (browser) => {
                     }).then(async ([nov, created]) => {
                         await nov.jsonToChapter(novelData.lastChapter)
                         const update = created || novelData.releasedChapterCount !== nov.releasedChapterCount;
+                        if (novelData.releasedChapterCount > nov.releasedChapterCount && nov.isHiatus)
+                            novelData.isHiatus = false
                         return await nov.update(novelData).then(async n => {
                             if (update) return await nov.fetchJson(page)
                         })
