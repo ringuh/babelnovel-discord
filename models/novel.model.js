@@ -148,7 +148,7 @@ module.exports = function (sequelize, type) {
                 attributes: ["babelId"],
                 sort: ["babelId"]
             }).then(ids => ids.map(id => id.babelId))
-        
+
         return this.okChapterIds.includes(babelId)
     }
 
@@ -211,6 +211,9 @@ module.exports = function (sequelize, type) {
             json.data.isRemoved = true
             console.log(json.data.bookStrategy.strategy)
         }
+        if (json.data.releasedChapterCount > this.releasedChapterCount && this.isHiatus)
+            tmp.isHiatus = false
+
 
         const folder = "static/cover"
         const [coverAttachment, cover] = this.DiscordCover()
@@ -297,7 +300,7 @@ module.exports = function (sequelize, type) {
 
     Model.prototype.scrapeContent = async function (page, chapterJson, cssHash, params) {
         if (!page || !this.babelId) return null
-        
+
         chapterJson = { ...chapterJson, babelId: chapterJson.id }
         delete chapterJson.id
 

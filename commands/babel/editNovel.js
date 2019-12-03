@@ -74,7 +74,8 @@ const handleParams = (params) => {
         "token",
         "isCompleted",
         "isHiatus",
-        "isRemoved"
+        "isRemoved",
+        "releasedChapterCount"
     ]
     const shorts = ["removed", "completed", "pay", "hiatus"]
     let r = {}
