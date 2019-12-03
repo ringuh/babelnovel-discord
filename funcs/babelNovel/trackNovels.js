@@ -1,5 +1,5 @@
 const chalk = require('chalk')
-const { api, numerics } = global.config;
+const { api, numerics, strings } = global.config;
 const { Novel, TrackNovel, Setting } = require('../../models')
 const { red, magenta } = chalk.bold
 const scrapeNovel = require('./scrapeNovel')
@@ -28,9 +28,15 @@ const trackNovels = async (browser, client) => {
                     return request.abort()
                 return request.continue();
             }
+            const delay = await Setting.findOne({
+                where: { key: strings.puppeteer_busy }
+            }).then(setting => {
+                if (!setting) return numerics.puppeteer_delay
+                return numerics.puppeteer_delay * 3
+            })
 
-            await page.waitFor(numerics.puppeteer_delay * 3)
-            console.log(request.url())
+            await page.waitFor(delay)
+            console.log(request.url(), delay)
             return request.continue();
         });
         await page.goto("https://babelnovel.com/search");

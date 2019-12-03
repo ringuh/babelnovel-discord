@@ -204,8 +204,11 @@ module.exports = function (sequelize, type) {
             tmp.source_name = json.data.source.name || this.source_name
             tmp.source_url = json.data.source.url || this.source_url
         }
-        if (json.data.promotion && json.data.promotion.cutoffSeconds > 10000)
+        if (json.data.promotion && json.data.promotion.cutoffSeconds > 10000) {
             tmp.isPay = false
+            console.log(json.data.promotion)
+        }
+
 
         if (json.data.isShowStrategy) {
             json.data.isRemoved = true
