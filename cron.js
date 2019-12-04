@@ -71,7 +71,7 @@ const { Chapter, Novel, Sequelize } = require('./models')
             order: ['canonicalName']
         });
         browser = await launchBrowser()
-        await scrapeNovels(browser, novels, params)
+        await scrapeNovels(novels, params)
     }
     if (browser) await browser.disconnect()
     process.exit()
