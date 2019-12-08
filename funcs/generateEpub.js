@@ -13,7 +13,11 @@ const generateEpub = async (novel, chapters, params) => {
     let path = `./static/epub`
     if (!fs.existsSync(path)) fs.mkdirSync(path)
     path = `${path}/${params.ios ? 'ios_' : ''}${fn}.epub`
-    if (fs.existsSync(path) && !params.epub) return path
+    console.log("Generate epub", path)
+    if (fs.existsSync(path) && !params.epub){
+        //console.log("return path", path)
+        return path
+    }
 
     chapters = chapters.filter(c => c.index > 0).map(c => {
         if (c.epub) return c
@@ -65,6 +69,7 @@ const generateEpub = async (novel, chapters, params) => {
 
 
 const SplitEpub = async (novel, path, chapters, params) => {
+    console.log("split epub", path)
     return new Promise(async resolve => {
         const stats = fs.statSync(path)
         const fileSizeInMegabytes = stats["size"] / 1000000.0

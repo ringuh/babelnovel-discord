@@ -93,7 +93,7 @@ module.exports = {
             if (params.noepub) return await livemsg.setDescription("Parse finished. Skipping epub", true, 2)
             await livemsg.setDescription("Generating epub", null, 2)
             let epub = await generateEpub(novel, chapters, params)
-            console.log(epub)
+            
             return await livemsg.attach(epub, chapters)
         } catch (err) {
             console.log(err)
