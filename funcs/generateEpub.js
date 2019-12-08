@@ -1,8 +1,9 @@
 const fs = require('fs')
-//const Epub = require("epub-gen-funstory");
+const HeavyEpub = require("epub-gen-funstory");
 const Epub = require("quick-epub");
-const Axios = require('axios')
-const pathTool = require('path')
+
+
+
 
 
 const generateEpub = async (novel, chapters, params) => {
@@ -11,58 +12,91 @@ const generateEpub = async (novel, chapters, params) => {
 
     let path = `./static/epub`
     if (!fs.existsSync(path)) fs.mkdirSync(path)
-    path = `${path}/${fn}.epub`
-
+    path = `${path}/${params.ios ? 'ios_' : ''}${fn}.epub`
     if (fs.existsSync(path) && !params.epub) return path
-    let cover = novel.cover ? encodeURI(novel.cover) : null // || await DownloadCover(novel);
-    //console.log(cover)
-    const option = {
-        title: `${novel.name} ${chapters[0].index}-${chapters[chapters.length - 1].index}`,
-        author: [author],
-        output: path,
-        appendChapterTitles: true,
-        //cover: cover,
-        chapters: chapters.filter(c => c.index > 0).map(c => {
-            let stripped = c.chapterContent.replace("</p>", "\n").replace("<p>", "")
-            let words = stripped.split(/\s+/gi).length
-            stripped = `<div style="font-size: 70%;">${stripped.length} characters | ${words} words</div>`
-            return {
-                title: c.name,
-                content: `${c.chapterContent}${stripped}`,
-            }
-        })
-    };
+
+    chapters = chapters.filter(c => c.index > 0).map(c => {
+        if (c.epub) return c
+        let stripped = c.chapterContent.replace("</p>", "\n").replace("<p>", "")
+        let words = stripped.split(/\s+/gi).length
+        stripped = `<div style="font-size: 70%;">${stripped.length} characters | ${words} words</div>`
+        if (params.ios) c.epub = {
+            title: c.name,
+            data: `${c.chapterContent}${stripped}`,
+        }
+        else c.epub = {
+            title: c.name,
+            content: `${c.chapterContent}${stripped}`,
+        }
+        delete c.chapterContent
+        return c
+    })
 
     return await new Promise(resolve => {
+        const fullEpub = path.replace(".epub", "_full.epub")
+        const [coverName, coverAttachment] = novel.DiscordCover()
+        const option = {
+            title: `${novel.name} ${chapters[0].index}-${chapters[chapters.length - 1].index}`,
+            author: params.ios ? author : [author],
+            output: path,
+            appendChapterTitles: true,
+            cover: coverAttachment ? coverAttachment.replace("attachment://", '') : null,
+            [params.ios ? 'content' : 'chapters']: chapters.map(c => c.epub)
+        };
 
-        Epub.createFile(option)
-            .then(async () => {
-                const stats = fs.statSync(path)
-                const fileSizeInMegabytes = stats["size"] / 1000000.0
-
-                if (fileSizeInMegabytes > 8) {
-                    const fullEpub = path.replace(".epub", "_full.epub")
-                    if (fs.existsSync(fullEpub)) fs.unlinkSync(fullEpub)
-                    fs.renameSync(path, fullEpub)
-
-                    const splitTo = Math.ceil(fileSizeInMegabytes / 8)
-                    const chapterCount = Math.floor(chapters.length / splitTo)
-                    let paths = []
-
-                    for (var i = 0; i < splitTo; ++i) {
-                        const chaps = chapters.splice(0, (i + 1 < splitTo) ? chapterCount : chapters.length)
-                        const p = await generateEpub(novel, chaps, params)
-                        paths.push(p)
-                    }
-                    resolve(paths)
-                }
-                else resolve(path)
-            }).catch(err => {
+        if (fs.existsSync(fullEpub)) {
+            resolve(SplitEpub(novel, fullEpub, chapters, resolve))
+        } else if (params.ios)
+            new HeavyEpub(option).promise
+                .then(async () => resolve(SplitEpub(novel, path, chapters, params)))
+                .catch(err => {
+                    console.log(err.message)
+                    resolve(null)
+                })
+        else Epub.createFile(option)
+            .then(async () => resolve(SplitEpub(novel, path, chapters, params)))
+            .catch(err => {
                 console.log(err.message)
                 resolve(null)
             })
     })
 
 };
+
+
+const SplitEpub = async (novel, path, chapters, params) => {
+    return new Promise(async resolve => {
+        const stats = fs.statSync(path)
+        const fileSizeInMegabytes = stats["size"] / 1000000.0
+
+        if (fileSizeInMegabytes > 8) {
+            if (!path.endsWith("_full.epub")) {
+                const fullEpub = path.replace(".epub", "_full.epub")
+                if (fs.existsSync(fullEpub)) fs.unlinkSync(fullEpub)
+                fs.renameSync(path, fullEpub)
+            }
+            const splitTo = Math.ceil(fileSizeInMegabytes / 8)
+            //const chapterCount = Math.floor(chapters.length / splitTo)
+            let chapterCount = 1500
+            
+            if (chapters.length >= 1200)
+                chapterCount = 1000
+            else if (chapters.length >= 1000)
+                chapterCount = 800
+            else if (chapters.length >= 800)
+                chapterCount = 500
+            else if (chapters.length >= 500)
+                chapterCount = Math.floor(chapters.length / splitTo)
+            let paths = []
+            while (chapters.length) {
+                const chaps = chapters.splice(0, chapterCount)
+                const p = await generateEpub(novel, chaps, params)
+                paths.push(p)
+            }
+            resolve(paths)
+        }
+        else resolve(path)
+    })
+}
 
 module.exports = generateEpub

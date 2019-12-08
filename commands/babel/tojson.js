@@ -12,9 +12,9 @@ module.exports = {
     name: ['tojson'],
     description: 'Turns chapter data into json (private)',
     args: "<novel>",
-    hidden: true,
+    hidden: false,
     async execute(message, args, params = []) {
-        if (!isBypass(message)) return false
+        //if (!isBypass(message)) return false
 
         if (args.length < 1) return usageMessage(message, this)
 
@@ -44,8 +44,7 @@ module.exports = {
             delete c.updatedAt
             return c
         }).sort((a, b) => a.index - b.index)
-
-
+        
         const prefix = global.config.db.options.host === 'localhost' ? '!' : ''
 
         Zip(novel, chapters).then(async files => {

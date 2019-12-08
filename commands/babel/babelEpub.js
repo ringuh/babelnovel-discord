@@ -93,7 +93,7 @@ module.exports = {
             if (params.noepub) return await livemsg.setDescription("Parse finished. Skipping epub", true, 2)
             await livemsg.setDescription("Generating epub", null, 2)
             let epub = await generateEpub(novel, chapters, params)
-
+            console.log(epub)
             return await livemsg.attach(epub, chapters)
         } catch (err) {
             console.log(err)
@@ -121,9 +121,10 @@ const handleParameters = async (parameters, novelStr, message) => {
         noepub: parameters.includes('noepub') || parameters.includes('tojson'),
         tojson: parameters.includes('tojson'),
         keep: parameters.includes('keep'),
-        ignore: parameters.includes('ignore'),
+        //ignore: parameters.includes('ignore'),
         reverse: parameters.includes('reverse'),
         hop: parameters.includes('hop'),
+        ios: parameters.includes('ios'),
         token: null,
         reqGroupID: Date.now().toString()
     }

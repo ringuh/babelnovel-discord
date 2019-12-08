@@ -29,7 +29,8 @@ const fetchCSS = async (page, url) => {
             }
         });
 
-        if (!cssFile) return CSSError('CSS File not found')
+        if (!cssFile) return ""
+        //if (!cssFile) return CSSError('CSS File not found')
 
         let [hash_path, hash] = cssFile.split('?hash=')
         if (hash.length < 5) return CSSError('CSS hash not found', cssFile)
