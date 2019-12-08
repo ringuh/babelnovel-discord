@@ -7,36 +7,37 @@ const Epub = require("quick-epub");
 
 
 const generateEpub = async (novel, chapters, params) => {
-    let author = [novel.authorEn, novel.author].filter(n => n).join(" | ")
-    let fn = `${novel.canonicalName}_${chapters.length}_${chapters[0].index}-${chapters[chapters.length - 1].index}`
-
-    let path = `./static/epub`
-    if (!fs.existsSync(path)) fs.mkdirSync(path)
-    path = `${path}/${params.ios ? 'ios_' : ''}${fn}.epub`
-    console.log("Generate epub", path)
-    if (fs.existsSync(path) && !params.epub){
-        //console.log("return path", path)
-        return path
-    }
-
-    chapters = chapters.filter(c => c.index > 0).map(c => {
-        if (c.epub) return c
-        let stripped = c.chapterContent.replace("</p>", "\n").replace("<p>", "")
-        let words = stripped.split(/\s+/gi).length
-        stripped = `<div style="font-size: 70%;">${stripped.length} characters | ${words} words</div>`
-        if (params.ios) c.epub = {
-            title: c.name,
-            data: `${c.chapterContent}${stripped}`,
-        }
-        else c.epub = {
-            title: c.name,
-            content: `${c.chapterContent}${stripped}`,
-        }
-        delete c.chapterContent
-        return c
-    })
-
     return await new Promise(resolve => {
+        let author = [novel.authorEn, novel.author].filter(n => n).join(" | ")
+        let fn = `${novel.canonicalName}_${chapters.length}_${chapters[0].index}-${chapters[chapters.length - 1].index}`
+
+        let path = `./static/epub`
+        if (!fs.existsSync(path)) fs.mkdirSync(path)
+        path = `${path}/${params.ios ? 'ios_' : ''}${fn}.epub`
+        console.log("Generate epub", path)
+        if (fs.existsSync(path) && !params.epub) {
+            //console.log("return path", path)
+            return resolve(path)
+        }
+
+        chapters = chapters.filter(c => c.index > 0).map(c => {
+            if (c.epub) return c
+            let stripped = c.chapterContent.replace("</p>", "\n").replace("<p>", "")
+            let words = stripped.split(/\s+/gi).length
+            stripped = `<div style="font-size: 70%;">${stripped.length} characters | ${words} words</div>`
+            if (params.ios) c.epub = {
+                title: c.name,
+                data: `${c.chapterContent}${stripped}`,
+            }
+            else c.epub = {
+                title: c.name,
+                content: `${c.chapterContent}${stripped}`,
+            }
+            delete c.chapterContent
+            return c
+        })
+
+
         const fullEpub = path.replace(".epub", "_full.epub")
         const [coverName, coverAttachment] = novel.DiscordCover()
         const option = {
@@ -83,7 +84,7 @@ const SplitEpub = async (novel, path, chapters, params) => {
             const splitTo = Math.ceil(fileSizeInMegabytes / 8)
             //const chapterCount = Math.floor(chapters.length / splitTo)
             let chapterCount = 1500
-            
+
             if (chapters.length >= 1200)
                 chapterCount = 1000
             else if (chapters.length >= 1000)
