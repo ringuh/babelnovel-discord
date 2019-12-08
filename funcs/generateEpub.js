@@ -16,7 +16,6 @@ const generateEpub = async (novel, chapters, params) => {
         path = `${path}/${params.ios ? 'ios_' : ''}${fn}.epub`
         console.log("Generate epub", path)
         if (fs.existsSync(path) && !params.epub) {
-            //console.log("return path", path)
             return resolve(path)
         }
 
@@ -50,20 +49,22 @@ const generateEpub = async (novel, chapters, params) => {
         };
 
         if (fs.existsSync(fullEpub)) {
-            resolve(SplitEpub(novel, fullEpub, chapters, resolve))
-        } else if (params.ios)
+            resolve(SplitEpub(novel, fullEpub, chapters, params))
+        } else if (params.ios) {
             new HeavyEpub(option).promise
                 .then(async () => resolve(SplitEpub(novel, path, chapters, params)))
                 .catch(err => {
                     console.log(err.message)
                     resolve(null)
                 })
-        else Epub.createFile(option)
+        } else {
+            Epub.createFile(option)
             .then(async () => resolve(SplitEpub(novel, path, chapters, params)))
             .catch(err => {
                 console.log(err.message)
                 resolve(null)
             })
+        }
     })
 
 };
