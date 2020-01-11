@@ -7,6 +7,7 @@ const fetchNovels = require('./funcs/babelNovel/fetchNovels')
 const scrapeNovels = require('./funcs/babelNovel/scrapeNovel')
 const announceNovels = require('./funcs/babelNovel/announceNovels')
 const trackNovels = require('./funcs/babelNovel/trackNovels')
+const checkRaw = require('./funcs/babelNovel/checkRaw')
 const { Chapter, Novel, Sequelize } = require('./models')
 
 !(async () => {
@@ -35,6 +36,11 @@ const { Chapter, Novel, Sequelize } = require('./models')
 
     else if (process.argv.includes('announce')) {
         await announceNovels()
+    }
+
+    else if (process.argv.includes('raw')) {
+        browser = await launchBrowser()
+        await checkRaw(browser)
     }
 
     else if (process.argv.includes('update')) {

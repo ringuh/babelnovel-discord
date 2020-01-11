@@ -24,8 +24,7 @@ module.exports = {
         let params = await handleParameters(parameters)
 
         console.log(params)
-
-        return true
+        
         let queryStr = {
             where: {
                 chapterContent: {
