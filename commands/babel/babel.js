@@ -7,7 +7,7 @@ const { RichEmbed } = require('discord.js')
 const { api, numerics } = global.config
 
 module.exports = {
-    name: ['babel'],
+    name: ['babel', 'b'],
     description: 'Print novel info',
     args: "<novel>",
     async execute(message, args, params) {
@@ -33,15 +33,15 @@ module.exports = {
 
         if (params.includes('script')) {
             const codeStr = `!((id) => { \/\/ ${novel.name}\n` +
-                `const token = document.cookie.split(";").map(c => c.trim()).find(c => c.startsWith("_bc_novel_token=")).slice(16, document.cookie.length)\n` +
-                `const url = "/api/user/libraries"\n` +
+                `const cookie = document.cookie.split(";").map(c => c.trim())\n`+
+                `const token = cookie.find(c => c.startsWith("_bc_novel_token=")).slice(16, 99)\n` +
                 `const xhttp = new XMLHttpRequest();\n` +
 
-                `xhttp.open("POST", url, true);\n` +
+                `xhttp.open("POST", "/api/user/libraries", true);\n` +
                 `xhttp.setRequestHeader("Content-type", "application/json");\n` +
                 `xhttp.setRequestHeader("token", token);\n` +
 
-                `var d = JSON.stringify({\n` +
+                `const d = JSON.stringify({\n` +
                 `\tbookId: id\n` +
                 `})\n` +
                 `xhttp.send(d);\n` +
@@ -52,7 +52,7 @@ module.exports = {
 
         else if (params.includes('be') || params.includes('scrape')) {
             const prefixes = [
-                ["?", "", false],
+                ["?", "noepub", false],
                 [":", "reverse", false],
                 ["\t", "hop", true]
             ]
@@ -60,7 +60,7 @@ module.exports = {
                 `${novel.name} (${novel.chapters.length} / ${novel.releasedChapterCount})`,
                 { code: true }).then(msg => msg.Expire(this.message))
             prefixes.forEach(async prefix => {
-                const line = `${prefix[0]}be ${novel.canonicalName} | noepub ${prefix[1]}`
+                const line = `${prefix[0]}be ${novel.canonicalName} | ${prefix[1]}`
                 await message.channel.send(line, { code: prefix[2] });
             })
 
@@ -75,8 +75,8 @@ module.exports = {
             novel.isHiatus ? 'Hiatus' : null,
             novel.isCompleted ? 'Completed' : null
         ].filter(l => l).join(" | ")
-
         const [coverName, coverAttachment] = novel.DiscordCover()
+
         const emb = new RichEmbed()
             .setColor('#0099ff')
             .setTitle(novel.name)
@@ -93,17 +93,16 @@ module.exports = {
             .addField("Chapters", novel.releasedChapterCount, true)
             .addField("Epub", novel.chapters.length, true)
             .addBlankField(true)
-            .addField("Name", novel.alias, true)
+        if (novel.cnName) emb.addField("Name", novel.cnName, true)
         if (novel.author || novel.authorEn)
             emb.addField("Author",
                 [novel.authorEn, novel.author].filter(a => a && a.length).join(" | "), true)
         emb.addBlankField()
+        if(novel.isRemoved)
+            emb.addField("Library script command", `!babel ${novel.canonicalName} | script`)
 
-        /*  if (novel.source_name)
-             emb.addField("Source", novel.source_name, true) */
         if (novel.source_url)
-            emb.addBlankField()
-                .addField("Source", novel.source_url)
+            emb.addBlankField().addField("Source", novel.source_url)
 
         await message.channel.send(emb).then(msg => msg.Expire(message, params.includes("keep")));
 

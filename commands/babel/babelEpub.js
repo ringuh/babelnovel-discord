@@ -117,8 +117,12 @@ const handleParameters = async (parameters, novelStr, message) => {
             parameters.includes("force") ||
             parameters.includes('reverse') ||
             parameters.includes('tojson'),
-        epub: parameters.includes('epub') || parameters.includes("force"),
-        noepub: parameters.includes('noepub') || parameters.includes('tojson'),
+        epub: parameters.includes('epub'),
+        noepub: parameters.includes('noepub') 
+            || parameters.includes('tojson')
+            || parameters.includes('hop')
+            || parameters.includes('reverse')
+            || parameters.includes('no'),
         tojson: parameters.includes('tojson'),
         keep: parameters.includes('keep'),
         //ignore: parameters.includes('ignore'),

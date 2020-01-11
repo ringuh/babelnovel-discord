@@ -11,15 +11,21 @@ const tojson = require('./tojson')
 const setting_key = 'epub_channel'
 
 module.exports = {
-    name: ['updateall'],
+    name: ['updateall', 'ua'],
     description: 'Updates all excisting epubs',
     args: null,
     hidden: true,
     async execute(message, args, parameters) {
         if (!isBypass(message, false)) return false
-
+        
+        if (args.length > 0 && parseInt(args[0]) >= 0) parameters.push(`limit=${args[0]}`)
+        if (args.length > 1 && parseInt(args[1]) >= 0) parameters.push(`cap_limit=${args[1]}`)
+       
         let params = await handleParameters(parameters)
 
+        console.log(params)
+
+        return true
         let queryStr = {
             where: {
                 chapterContent: {
@@ -34,7 +40,7 @@ module.exports = {
 
         const novel_ids = await Chapter.findAll(queryStr).then(chapters =>
             chapters.filter(c =>
-                c.dataValues.count >= params.limit 
+                c.dataValues.count >= params.limit
                 && c.dataValues.count <= params.cap_limit
                 && (!params.greed || c.novel.token == "greed")
             ).map(c => c.novel.id)
@@ -109,8 +115,11 @@ const handleParameters = async (parameters) => {
 
     let limit = parameters.find(p => p.startsWith("limit="))
     params.limit = limit ? parseInt(limit.split("=")[1]) : params.limit
-    if(params.limit < numerics.update_chapter_limit)
+    if (params.limit < numerics.update_chapter_limit)
         params.cap_limit = numerics.update_chapter_limit
+    
+    let cap_limit = parameters.find(p => p.startsWith("cap_limit="))
+    params.cap_limit = cap_limit ? parseInt(cap_limit.split("=")[1]) : params.cap_limit
 
     let token = parameters.find(p => p.startsWith("token="))
     if (!token && parameters.includes('token')) params.token = "rinku"

@@ -42,8 +42,18 @@ module.exports = function (sequelize, type) {
         historyCanonicalName: { // martial-arts-peak
             type: type.STRING,
         },
-        alias: {
+        cnName: {
             type: type.STRING,
+            set(value) {
+                if (!value || !value.length) value = this.getDataValue('cnName')
+                if (value && !value.length) value = null
+                this.setDataValue('cnName', value)
+            },
+            get() {
+                let val = this.getDataValue('cnName')
+                if (!val || !val.trim().length) return null
+                return val
+            }
         },
         authorId: { // 78c8d251-1812-4927-bbe2-d0d3bcdef976
             type: type.STRING,
